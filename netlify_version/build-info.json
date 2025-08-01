@@ -1,0 +1,12 @@
+{
+    "build_date": "2025-08-01T11:22:45Z",
+    "version": "2.0.0-serverless",
+    "backend": "Python Netlify Functions",
+    "features": [
+        "Python backend con Pillow",
+        "Efectos profesionales",
+        "Google AdSense",
+        "Canvas frontend",
+        "Drag & drop"
+    ]
+}

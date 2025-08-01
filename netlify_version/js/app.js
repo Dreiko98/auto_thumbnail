@@ -239,30 +239,59 @@ class ThumbnailApp {
         this.setGeneratingState(true);
 
         try {
-            // Generar thumbnail
-            await this.generator.generateThumbnail(
-                this.backgroundImage,
-                title,
-                this.iconFiles
-            );
-
-            // Mostrar vista previa
-            this.elements.previewContainer.style.display = 'block';
-            this.elements.previewContainer.scrollIntoView({ behavior: 'smooth' });
+            // Preparar datos para el backend serverless
+            const backgroundBase64 = await this.imageToBase64(this.backgroundImage);
             
-            this.showAlert('🎉 ¡Thumbnail generado exitosamente!', 'success');
+            // Convertir iconos a base64
+            const iconsBase64 = [];
+            for (const iconFile of this.iconFiles) {
+                const iconBase64 = await this.imageToBase64(iconFile);
+                iconsBase64.push(iconBase64);
+            }
 
-            // Google Analytics event (si está configurado)
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'thumbnail_generated', {
-                    'event_category': 'engagement',
-                    'event_label': 'success'
-                });
+            // Llamar a la función serverless de Netlify
+            const response = await fetch('/.netlify/functions/generate_thumbnail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    background: backgroundBase64,
+                    title: title,
+                    icons: iconsBase64
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.success && result.thumbnail) {
+                // Mostrar thumbnail generado en canvas
+                await this.displayThumbnailFromBase64(result.thumbnail);
+                
+                // Mostrar vista previa
+                this.elements.previewContainer.style.display = 'block';
+                this.elements.previewContainer.scrollIntoView({ behavior: 'smooth' });
+                
+                this.showAlert('🎉 ¡Thumbnail generado exitosamente con backend Python!', 'success');
+
+                // Google Analytics event (si está configurado)
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'thumbnail_generated', {
+                        'event_category': 'engagement',
+                        'event_label': 'serverless_success'
+                    });
+                }
+            } else {
+                throw new Error(result.error || 'Error desconocido generando thumbnail');
             }
 
         } catch (error) {
             console.error('Error generando thumbnail:', error);
-            this.showAlert('Error generando el thumbnail. Por favor, intenta de nuevo.', 'error');
+            this.showAlert(`❌ Error: ${error.message}`, 'error');
         } finally {
             this.setGeneratingState(false);
         }
@@ -303,6 +332,38 @@ class ThumbnailApp {
             this.elements.btnText.style.display = 'inline';
             this.elements.btnLoading.style.display = 'none';
         }
+    }
+
+    async imageToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async displayThumbnailFromBase64(base64Data) {
+        const canvas = this.elements.previewCanvas;
+        const ctx = canvas.getContext('2d');
+        
+        // Crear imagen desde base64
+        const img = new Image();
+        
+        return new Promise((resolve, reject) => {
+            img.onload = () => {
+                // Limpiar canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Dibujar imagen generada por el backend Python
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                resolve();
+            };
+            
+            img.onerror = reject;
+            img.src = `data:image/png;base64,${base64Data}`;
+        });
     }
 
     showAlert(message, type = 'info') {
