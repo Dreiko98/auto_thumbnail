@@ -17,8 +17,8 @@ class ThumbnailGenerator {
             maxIcons: 4,
             font: {
                 family: 'Alliance No.2 Bold Italic, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-                baseSize: 220,
-                minSize: 120,
+                baseSize: 380,
+                minSize: 280,
                 maxLines: 2
             },
             effects: {
@@ -141,8 +141,8 @@ class ThumbnailGenerator {
      */
     calculateOptimalFontSize(text) {
         let fontSize = this.config.font.baseSize;
-        const maxWidth = this.config.width * 0.9; // 90% del ancho
-        const maxHeight = this.config.height * 0.5; // 50% del alto
+        const maxWidth = this.config.width * 0.85; // 85% del ancho
+        const maxHeight = this.config.height * 0.45; // 45% del alto
         
         while (fontSize > this.config.font.minSize) {
             this.ctx.font = `italic bold ${fontSize}px ${this.config.font.family}`;
@@ -151,13 +151,13 @@ class ThumbnailGenerator {
             const lines = this.wrapText(text, maxWidth);
             
             if (lines.length <= this.config.font.maxLines) {
-                const totalHeight = lines.length * fontSize * 1.2;
+                const totalHeight = lines.length * fontSize * 1.1;
                 if (totalHeight <= maxHeight) {
                     return { fontSize, lines };
                 }
             }
             
-            fontSize -= 10; // Reducir en pasos de 10px
+            fontSize -= 15; // Reducir en pasos más pequeños
         }
         
         // Fallback: usar tamaño mínimo
