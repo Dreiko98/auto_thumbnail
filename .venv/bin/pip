@@ -1,4 +1,4 @@
-#!/home/ayuda137/Escritorio/handy_scripts/auto_thumbnail/.venv/bin/python3
+#!/home/linux-de-german-mallo/Escritorio/auto_thumbnail/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

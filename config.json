@@ -7,7 +7,7 @@
     "license": "MIT"
   },
   "web_server": {
-    "default_port": 5000,
+    "default_port": 8080,
     "host": "0.0.0.0",
     "debug": false,
     "auto_open_browser": true
