@@ -17,8 +17,8 @@ class ThumbnailGenerator {
             maxIcons: 4,
             font: {
                 family: 'Alliance No.2 Bold Italic, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-                baseSize: 380,
-                minSize: 280,
+                baseSize: 160,
+                minSize: 100,
                 maxLines: 2
             },
             effects: {
@@ -157,7 +157,7 @@ class ThumbnailGenerator {
                 }
             }
             
-            fontSize -= 15; // Reducir en pasos más pequeños
+            fontSize -= 8; // Reducir en pasos más pequeños (era 15)
         }
         
         // Fallback: usar tamaño mínimo
