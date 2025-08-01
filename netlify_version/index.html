@@ -358,11 +358,11 @@
                             <label for="backgroundImage">📸 Imagen de Fondo</label>
                             <div class="file-upload" id="backgroundUpload">
                                 <input type="file" id="backgroundImage" accept="image/*" required>
-                                <div class="file-upload-content">
-                                    <div class="file-upload-icon">📁</div>
-                                    <p><strong>Arrastra tu imagen aquí</strong><br>o haz clic para seleccionar</p>
-                                    <small>PNG, JPG, WEBP - Máximo 10MB</small>
-                                </div>
+                                                            <div class="file-upload-content">
+                                <div class="file-upload-icon">🎯</div>
+                                <p><strong>Arrastra iconos aquí</strong><br>o haz clic para seleccionar</p>
+                                <small>PNG, SVG - Máximo 4 iconos</small>
+                            </div>
                             </div>
                         </div>
 
@@ -393,9 +393,12 @@
                         </div>
 
                         <!-- Botón generar -->
+                                                <!-- Botón generar -->
                         <button type="submit" class="btn btn-primary btn-block" id="generateBtn">
-                            <span id="btnText">🚀 Generar Thumbnail</span>
-                            <span id="btnLoading" class="loading" style="display: none;"></span>
+                            <span id="btnText">🎨 Generar Thumbnail</span>
+                            <span id="btnLoading" style="display: none;">
+                                <span class="loading"></span> Generando...
+                            </span>
                         </button>
                     </form>
 
@@ -404,8 +407,8 @@
                         <h3>✨ Tu Thumbnail</h3>
                         <canvas id="previewCanvas" class="preview-image" width="1920" height="1080"></canvas>
                         <br><br>
-                        <button type="button" class="btn btn-success btn-block" id="downloadBtn">
-                            📥 Descargar Thumbnail (PNG)
+                                                <button type="button" class="btn btn-success btn-block" id="downloadBtn">
+                            📥 Descargar Thumbnail PNG
                         </button>
                     </div>
 

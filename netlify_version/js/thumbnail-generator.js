@@ -17,8 +17,8 @@ class ThumbnailGenerator {
             maxIcons: 4,
             font: {
                 family: 'Alliance No.2 Bold Italic, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-                baseSize: 158.52,
-                minSize: 60,
+                baseSize: 220,
+                minSize: 120,
                 maxLines: 2
             },
             effects: {
@@ -141,8 +141,8 @@ class ThumbnailGenerator {
      */
     calculateOptimalFontSize(text) {
         let fontSize = this.config.font.baseSize;
-        const maxWidth = this.config.width * 0.85; // 85% del ancho
-        const maxHeight = this.config.height * 0.3; // 30% del alto
+        const maxWidth = this.config.width * 0.9; // 90% del ancho
+        const maxHeight = this.config.height * 0.5; // 50% del alto
         
         while (fontSize > this.config.font.minSize) {
             this.ctx.font = `italic bold ${fontSize}px ${this.config.font.family}`;
@@ -157,7 +157,7 @@ class ThumbnailGenerator {
                 }
             }
             
-            fontSize -= 6; // Reducir en pasos de 6px
+            fontSize -= 10; // Reducir en pasos de 10px
         }
         
         // Fallback: usar tamaño mínimo
@@ -246,12 +246,12 @@ class ThumbnailGenerator {
         );
 
         const iconSize = this.calculateIconSize(icons.length);
-        const totalWidth = icons.length * iconSize + (icons.length - 1) * (iconSize * 0.2);
+        const totalWidth = icons.length * iconSize + (icons.length - 1) * (iconSize * 0.15); // Menos separación
         const startX = (this.config.width - totalWidth) / 2;
-        const iconY = this.config.height * 0.75; // 75% de la altura
+        const iconY = this.config.height * 0.78; // Un poco más abajo (era 0.75)
 
         icons.forEach((icon, index) => {
-            const x = startX + index * (iconSize + iconSize * 0.2);
+            const x = startX + index * (iconSize + iconSize * 0.15); // Menos separación
             
             // Sombra para iconos
             this.ctx.save();
@@ -269,18 +269,18 @@ class ThumbnailGenerator {
      * Calcula el tamaño óptimo para los iconos
      */
     calculateIconSize(iconCount) {
-        const baseSize = 150;
-        const maxWidth = this.config.width * 0.6; // 60% del ancho disponible
+        const baseSize = 280; // Mucho más grande que antes (era 150)
+        const maxWidth = this.config.width * 0.8; // 80% del ancho disponible
         
         // Calcular tamaño basado en cantidad de iconos
         let iconSize = baseSize;
-        const totalWidthNeeded = iconCount * iconSize + (iconCount - 1) * (iconSize * 0.2);
+        const totalWidthNeeded = iconCount * iconSize + (iconCount - 1) * (iconSize * 0.15);
         
         if (totalWidthNeeded > maxWidth) {
-            iconSize = maxWidth / (iconCount + (iconCount - 1) * 0.2);
+            iconSize = maxWidth / (iconCount + (iconCount - 1) * 0.15);
         }
         
-        return Math.max(80, Math.min(200, iconSize)); // Entre 80px y 200px
+        return Math.max(180, Math.min(320, iconSize)); // Entre 180px y 320px (antes era 80-200)
     }
 
     /**
