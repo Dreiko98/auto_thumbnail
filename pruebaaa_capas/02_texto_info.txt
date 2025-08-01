@@ -1,0 +1,4 @@
+Título: prueba de thumbnail largo
+Posición: Centrado
+Color: #FFFFFF
+Sombras: Interior (negro 35%) y Exterior (negro 50%)

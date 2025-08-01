@@ -1,0 +1,4 @@
+Título: esto es un ejemplo de un titulo que es largo de verdad
+Posición: Centrado
+Color: #FFFFFF
+Sombras: Interior (negro 35%) y Exterior (negro 50%)
