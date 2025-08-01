@@ -1,0 +1,73 @@
+{
+  "app": {
+    "name": "Thumbnail Generator",
+    "version": "2.0.0",
+    "description": "Generador profesional de thumbnails para blogs y redes sociales",
+    "author": "Desarrollador Senior Python",
+    "license": "MIT"
+  },
+  "web_server": {
+    "default_port": 5000,
+    "host": "0.0.0.0",
+    "debug": false,
+    "auto_open_browser": true
+  },
+  "thumbnail": {
+    "output_size": {
+      "width": 1920,
+      "height": 1080
+    },
+    "background_blur": 20,
+    "max_icons": 4,
+    "max_title_length": 100,
+    "font": {
+      "name": "Alliance No.2 Bold Italic",
+      "fallbacks": [
+        "DejaVu Sans Bold Oblique",
+        "Liberation Sans Bold Italic", 
+        "Ubuntu Bold Italic",
+        "Arial Bold Italic",
+        "Times Bold Italic"
+      ],
+      "size_initial": 158.52,
+      "size_minimum": 60.0,
+      "size_step": 6.0,
+      "max_lines": 2
+    },
+    "effects": {
+      "text": {
+        "drop_shadow": {
+          "opacity": 0.85,
+          "distance": 9,
+          "spread": 0.24,
+          "size": 40
+        },
+        "inner_shadow": {
+          "opacity": 0.45,
+          "angle": 30,
+          "size": 0.08,
+          "distance": 0
+        }
+      },
+      "icons": {
+        "drop_shadow": {
+          "opacity": 0.85,
+          "distance": 9,
+          "spread": 0.24,
+          "size": 40
+        }
+      }
+    }
+  },
+  "file_upload": {
+    "max_file_size": "50MB",
+    "allowed_extensions": ["png", "jpg", "jpeg", "gif", "bmp", "webp", "svg"],
+    "temp_cleanup_hours": 1
+  },
+  "desktop_app": {
+    "window_title": "🎨 Thumbnail Generator",
+    "startup_message": true,
+    "splash_duration": 4.0,
+    "auto_cleanup": true
+  }
+}
