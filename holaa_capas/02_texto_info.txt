@@ -1,4 +1,4 @@
-Título: Mi Dual boot Windows 11
+Título: Este título es de prueba esta vez
 Posición: Centrado
 Color: #FFFFFF
 Sombras: Interior (negro 35%) y Exterior (negro 50%)

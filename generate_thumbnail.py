@@ -118,16 +118,49 @@ def procesar_imagen_base(imagen_base, ancho=1920, alto=1080):
 
 def obtener_fuente(tamano):
     """
-    Obtiene la fuente Arial o una alternativa del sistema.
+    Obtiene la fuente Alliance No.2 Bold Italic o una alternativa en CURSIVA del sistema.
     
     Args:
         tamano (int): Tamaño de la fuente
         
     Returns:
-        PIL.ImageFont: Objeto de fuente
+        PIL.ImageFont: Objeto de fuente en cursiva
     """
-    # Intentar cargar Arial o fuentes alternativas comunes
+    # Intentar cargar Alliance No.2 Bold Italic primero, luego alternativas EN CURSIVA
     fuentes_posibles = [
+        # Alliance No.2 Bold Italic (preferida)
+        "Alliance-No2-BoldItalic.ttf",
+        "AllianceNo2-BoldItalic.ttf",
+        "Alliance No.2 Bold Italic.ttf",
+        "/usr/share/fonts/truetype/alliance/Alliance-No2-BoldItalic.ttf",
+        "/System/Library/Fonts/Alliance No.2 Bold Italic.ttf",  # macOS
+        "C:/Windows/Fonts/Alliance-No2-BoldItalic.ttf",  # Windows
+        
+        # Mejores alternativas Bold Italic disponibles en Linux
+        "/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf",  # Liberation Sans Bold Italic
+        "/usr/share/fonts/truetype/noto/NotoSerifDisplay-BoldItalic.ttf",      # Noto Serif Display Bold Italic
+        "/usr/share/fonts/opentype/urw-base35/NimbusMonoPS-BoldItalic.otf",    # Nimbus Mono PS Bold Italic
+        "/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf",  # Liberation Mono Bold Italic
+        "/usr/share/fonts/truetype/ubuntu/UbuntuSans-Italic[wdth,wght].ttf",   # Ubuntu Sans Bold Italic
+        "/usr/share/fonts/truetype/dejavu/DejaVuSerifCondensed-BoldItalic.ttf", # DejaVu Serif Bold Italic
+        
+        # Fallbacks Windows/macOS
+        "times-bold-italic.ttf",
+        "Times-BoldItalic.ttf",
+        "/System/Library/Fonts/Times Bold Italic.ttf",  # macOS
+        "C:/Windows/Fonts/timesbi.ttf",  # Windows Times Bold Italic
+        
+        # Más alternativas cursivas
+        "arial-italic.ttf",
+        "Arial-Italic.ttf",
+        "ariali.ttf",  # Arial Italic en Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf",  # DejaVu Bold Oblique
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf",
+        "/usr/share/fonts/truetype/ubuntu/Ubuntu-BoldItalic.ttf",
+        "/System/Library/Fonts/Arial Italic.ttf",  # macOS
+        "C:/Windows/Fonts/ariali.ttf",  # Windows Arial Italic
+        
+        # Si no hay cursivas específicas, usar regulares
         "arial.ttf",
         "Arial.ttf", 
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -136,15 +169,28 @@ def obtener_fuente(tamano):
         "C:/Windows/Fonts/arial.ttf"  # Windows
     ]
     
+    fuente_encontrada = None
+    fuente_usada = "Por defecto"
+    
     for fuente in fuentes_posibles:
         try:
-            return ImageFont.truetype(fuente, tamano)
+            fuente_encontrada = ImageFont.truetype(fuente, tamano)
+            fuente_usada = fuente
+            break
         except:
             continue
     
     # Si no encuentra ninguna, usar fuente por defecto
-    print("Advertencia: No se pudo cargar Arial, usando fuente por defecto")
-    return ImageFont.load_default()
+    if fuente_encontrada is None:
+        print("⚠️ Advertencia: No se pudo cargar ninguna fuente cursiva, usando fuente por defecto")
+        fuente_encontrada = ImageFont.load_default()
+        fuente_usada = "Sistema por defecto"
+    else:
+        # Mostrar solo el nombre del archivo para que sea más claro
+        nombre_fuente = fuente_usada.split('/')[-1] if '/' in fuente_usada else fuente_usada
+        print(f"✅ Fuente CURSIVA cargada: {nombre_fuente}")
+    
+    return fuente_encontrada
 
 
 def crear_sombra_texto(draw, texto, posicion, fuente, color_sombra, blur, offset):
@@ -207,7 +253,12 @@ def dividir_texto_en_lineas(texto, fuente, ancho_max):
 
 def añadir_titulo(imagen, titulo, ancho=1920, alto=1080):
     """
-    Añade el título centrado con efectos de sombra suave, sin contornos.
+    Añade el título centrado con efectos de sombra profesionales según especificaciones MEJORADAS.
+    - Cursiva (Alliance No.2 Bold Italic o fuente cursiva del sistema)
+    - Sombra paralela: 85% opacidad (más opaca), 9px distancia, 24% extensión, 40px tamaño
+    - Sombra interior: 45% opacidad (más opaca), 30° ángulo, 8% tamaño, 0px distancia
+    - Sin contorno
+    - AJUSTE DINÁMICO: Reduce automáticamente el tamaño para evitar más de 2 líneas
     
     Args:
         imagen (PIL.Image): Imagen base
@@ -218,24 +269,84 @@ def añadir_titulo(imagen, titulo, ancho=1920, alto=1080):
     Returns:
         PIL.Image: Imagen con título añadido
     """
+    import math
+    
     # Crear copia para no modificar original
     img_con_titulo = imagen.copy().convert('RGBA')
-    
-    # Calcular tamaño de fuente inicial (12% de la altura para permitir múltiples líneas)
-    tamano_fuente = int(alto * 0.12)
-    fuente = obtener_fuente(tamano_fuente)
     
     # Ancho máximo para el texto (85% del ancho total)
     ancho_max_texto = int(ancho * 0.85)
     
-    # Dividir texto en líneas
-    lineas = dividir_texto_en_lineas(titulo, fuente, ancho_max_texto)
+    # === ALGORITMO DE AJUSTE DINÁMICO DE TAMAÑO ===
+    # Comenzar con el tamaño ideal de 158.52pt y reducir hasta máximo 2 líneas
+    tamano_pt_inicial = 158.52
+    tamano_pt_minimo = 60.0   # Reducir tamaño mínimo para ser más agresivo
+    paso_reduccion = 6.0      # Reducir de a 6pt cada vez para más precisión
     
-    # Ajustar tamaño de fuente si hay muchas líneas
-    if len(lineas) > 2:
-        tamano_fuente = int(alto * 0.09)
-        fuente = obtener_fuente(tamano_fuente)
+    tamano_pt_actual = tamano_pt_inicial
+    lineas = []
+    fuente = None
+    
+    print(f"🔍 Ajustando tamaño de fuente para título: '{titulo[:50]}{'...' if len(titulo) > 50 else ''}'")
+    
+    while tamano_pt_actual >= tamano_pt_minimo:
+        # Convertir puntos a píxeles (1 punto = 1/72 pulgadas, 1 pulgada = 96 píxeles)
+        tamano_fuente_px = int(tamano_pt_actual * 96 / 72)
+        fuente = obtener_fuente(tamano_fuente_px)
+        
+        # Dividir texto en líneas con el tamaño actual
         lineas = dividir_texto_en_lineas(titulo, fuente, ancho_max_texto)
+        
+        print(f"   • {tamano_pt_actual:.1f}pt ({tamano_fuente_px}px) → {len(lineas)} línea(s)")
+        
+        # Si conseguimos máximo 2 líneas, usar este tamaño
+        if len(lineas) <= 2:
+            print(f"✅ Tamaño óptimo encontrado: {tamano_pt_actual:.1f}pt con {len(lineas)} línea(s)")
+            break
+        
+        # Reducir tamaño y probar de nuevo
+        tamano_pt_actual -= paso_reduccion
+    
+    # Si llegamos al mínimo y aún son más de 2 líneas, forzar a máximo 2 líneas
+    if len(lineas) > 2:
+        print(f"⚠️ Título muy largo - forzando a máximo 2 líneas con {tamano_pt_actual:.1f}pt")
+        
+        # Estrategia de emergencia: dividir por la mitad aproximadamente
+        palabras = titulo.split()
+        mitad = len(palabras) // 2
+        
+        # Buscar el mejor punto de división (evitar partir palabras cortas)
+        mejor_division = mitad
+        for i in range(max(1, mitad - 2), min(len(palabras) - 1, mitad + 3)):
+            if len(palabras[i]) > 3:  # Preferir dividir después de palabras largas
+                mejor_division = i
+                break
+        
+        linea1 = ' '.join(palabras[:mejor_division + 1])
+        linea2 = ' '.join(palabras[mejor_division + 1:])
+        
+        # Verificar que ambas líneas quepan
+        bbox1 = fuente.getbbox(linea1)
+        bbox2 = fuente.getbbox(linea2)
+        ancho1 = bbox1[2] - bbox1[0]
+        ancho2 = bbox2[2] - bbox2[0]
+        
+        if ancho1 <= ancho_max_texto and ancho2 <= ancho_max_texto:
+            lineas = [linea1, linea2]
+            print(f"✅ División optimizada en 2 líneas: '{linea1}' | '{linea2}'")
+        else:
+            # Si aún no cabe, usar división automática básica
+            lineas = dividir_texto_en_lineas(titulo, fuente, ancho_max_texto)[:2]  # Forzar máximo 2
+            print(f"⚠️ Usando división básica con {len(lineas)} líneas")
+    
+    # === VERIFICACIÓN FINAL DEL TAMAÑO DE FUENTE ===
+    if fuente is None:  # Fallback de seguridad
+        tamano_fuente_px = int(tamano_pt_minimo * 96 / 72)
+        fuente = obtener_fuente(tamano_fuente_px)
+        lineas = dividir_texto_en_lineas(titulo, fuente, ancho_max_texto)
+    else:
+        # Guardar el tamaño final en píxeles para usar más adelante
+        tamano_fuente_px = int(tamano_pt_actual * 96 / 72)
     
     # Calcular altura total del bloque de texto
     bbox_linea = fuente.getbbox("Ay")
@@ -243,42 +354,94 @@ def añadir_titulo(imagen, titulo, ancho=1920, alto=1080):
     espaciado_lineas = int(alto_linea * 0.3)  # Más espacio entre líneas
     alto_total_texto = len(lineas) * alto_linea + (len(lineas) - 1) * espaciado_lineas
     
-    # Posición Y centrada (o ligeramente arriba si hay iconos)
-    y_inicial = int((alto - alto_total_texto) * 0.4)  # Más arriba para dar espacio a iconos
+    # Posición Y centrada dinámicamente basada en el número de líneas
+    if len(lineas) == 1:
+        y_inicial = int((alto - alto_total_texto) * 0.38)  # Una línea: un poco más arriba
+    else:
+        y_inicial = int((alto - alto_total_texto) * 0.32)  # Dos líneas: más arriba para iconos
     
-    # Crear múltiples capas de sombras para efecto suave
-    img_sombras = Image.new('RGBA', (ancho, alto), (0, 0, 0, 0))
+    # === CREAR MÚLTIPLES CAPAS DE SOMBRAS PROFESIONALES ===
     
-    # Dibujar cada línea con sombras mejoradas
+    # === SOMBRA PARALELA MEJORADA ===
     y_actual = y_inicial
     for linea in lineas:
         bbox_actual = fuente.getbbox(linea)
         ancho_linea = bbox_actual[2] - bbox_actual[0]
         x = (ancho - ancho_linea) // 2
         
-        # Crear imagen temporal para esta línea con múltiples sombras
-        temp_sombra = Image.new('RGBA', (ancho, alto), (0, 0, 0, 0))
-        draw_temp = ImageDraw.Draw(temp_sombra)
+        # Especificaciones MEJORADAS: 85% opacidad (más opaca), 9px distancia, 40px blur
+        opacidad_paralela = int(255 * 0.85)  # ≈ 217 (más opaca que antes)
         
-        # Sombra exterior difusa (múltiples capas)
-        for offset in range(1, 8):
-            opacity = max(10, 60 - offset * 8)  # Sombra que se desvanece
-            for dx in [-offset, 0, offset]:
-                for dy in [-offset, 0, offset]:
-                    if dx != 0 or dy != 0:
-                        draw_temp.text((x + dx, y_actual + dy), linea, 
-                                     font=fuente, fill=(0, 0, 0, opacity))
-        
-        # Aplicar blur progresivo
-        temp_sombra = temp_sombra.filter(ImageFilter.GaussianBlur(radius=6))
-        img_sombras = Image.alpha_composite(img_sombras, temp_sombra)
+        # Crear múltiples capas de sombra para mayor profundidad
+        for desplazamiento in [12, 9, 6]:  # Múltiples sombras con diferentes desplazamientos
+            temp_sombra = Image.new('RGBA', (ancho, alto), (0, 0, 0, 0))
+            draw_sombra = ImageDraw.Draw(temp_sombra)
+            
+            # Opacidad decreciente para cada capa
+            opacidad_capa = int(opacidad_paralela * (desplazamiento / 12))
+            
+            # Dibujar sombra con desplazamiento
+            draw_sombra.text((x + desplazamiento, y_actual + desplazamiento), linea, 
+                           font=fuente, fill=(0, 0, 0, opacidad_capa))
+            
+            # Aplicar diferentes niveles de blur
+            blur_nivel = int(40 * (desplazamiento / 12))  # Blur más intenso para capas más lejanas
+            temp_sombra = temp_sombra.filter(ImageFilter.GaussianBlur(radius=blur_nivel))
+            
+            # Combinar con la imagen
+            img_con_titulo = Image.alpha_composite(img_con_titulo, temp_sombra)
         
         y_actual += alto_linea + espaciado_lineas
     
-    # Combinar sombras con imagen
-    img_con_titulo = Image.alpha_composite(img_con_titulo, img_sombras)
+    # === SOMBRA INTERIOR IMPLEMENTADA CORRECTAMENTE ===
+    y_actual = y_inicial
+    for linea in lineas:
+        bbox_actual = fuente.getbbox(linea)
+        ancho_linea = bbox_actual[2] - bbox_actual[0]
+        x = (ancho - ancho_linea) // 2
+        
+        # Especificaciones MEJORADAS: 45% opacidad (más opaca), 30° ángulo, 8% tamaño
+        opacidad_interior = int(255 * 0.45)  # ≈ 115 (más opaca que antes)
+        
+        # Calcular desplazamiento para ángulo de 30°
+        angulo_rad = math.radians(30)
+        tamano_sombra_interior = max(3, int(tamano_fuente_px * 0.08))  # 8% del tamaño de fuente
+        
+        # Desplazamiento basado en el ángulo (30° hacia arriba-derecha)
+        dx_interior = int(tamano_sombra_interior * math.cos(angulo_rad))
+        dy_interior = -int(tamano_sombra_interior * math.sin(angulo_rad))  # Negativo para ir hacia arriba
+        
+        # CREAR SOMBRA INTERIOR REALISTA
+        # La sombra interior se simula dibujando una versión más oscura del texto
+        # ligeramente desplazada DENTRO del contorno del texto principal
+        
+        # Crear máscara del texto principal
+        temp_mascara = Image.new('RGBA', (ancho, alto), (0, 0, 0, 0))
+        draw_mascara = ImageDraw.Draw(temp_mascara)
+        draw_mascara.text((x, y_actual), linea, font=fuente, fill=(255, 255, 255, 255))
+        
+        # Crear sombra interior
+        temp_sombra_interior = Image.new('RGBA', (ancho, alto), (0, 0, 0, 0))
+        draw_interior = ImageDraw.Draw(temp_sombra_interior)
+        
+        # Dibujar múltiples capas de sombra interior para mayor realismo
+        for intensidad in [1.0, 0.7, 0.4]:
+            alpha_interior = int(opacidad_interior * intensidad)
+            desplaz_x = int(dx_interior * intensidad)
+            desplaz_y = int(dy_interior * intensidad)
+            
+            draw_interior.text((x + desplaz_x, y_actual + desplaz_y), linea, 
+                             font=fuente, fill=(0, 0, 0, alpha_interior))
+        
+        # Aplicar ligero blur para suavizar la sombra interior
+        temp_sombra_interior = temp_sombra_interior.filter(ImageFilter.GaussianBlur(radius=2))
+        
+        # Combinar sombra interior
+        img_con_titulo = Image.alpha_composite(img_con_titulo, temp_sombra_interior)
+        
+        y_actual += alto_linea + espaciado_lineas
     
-    # Dibujar texto principal sin contornos duros
+    # === TEXTO PRINCIPAL EN CURSIVA ===
     draw_final = ImageDraw.Draw(img_con_titulo)
     y_actual = y_inicial
     
@@ -287,10 +450,7 @@ def añadir_titulo(imagen, titulo, ancho=1920, alto=1080):
         ancho_linea = bbox_actual[2] - bbox_actual[0]
         x = (ancho - ancho_linea) // 2
         
-        # Solo sombra muy sutil para definición
-        draw_final.text((x + 1, y_actual + 1), linea, font=fuente, fill=(0, 0, 0, 100))
-        
-        # Texto principal blanco brillante
+        # Blanco puro sin contorno, en cursiva (la fuente ya debe ser cursiva)
         draw_final.text((x, y_actual), linea, font=fuente, fill=(255, 255, 255, 255))
         
         y_actual += alto_linea + espaciado_lineas
@@ -346,7 +506,8 @@ def procesar_iconos(lista_iconos, ancho_max_por_icono):
 
 def añadir_iconos(imagen, iconos, ancho=1920, alto=1080):
     """
-    Añade los iconos en fila horizontal centrada, asegurándose de que quepan completamente.
+    Añade los iconos en fila horizontal centrada con sombra paralela profesional MEJORADA.
+    - Sombra paralela: 85% opacidad (más opaca), 9px distancia, 24% extensión, 40px tamaño
     
     Args:
         imagen (PIL.Image): Imagen con título
@@ -362,16 +523,16 @@ def añadir_iconos(imagen, iconos, ancho=1920, alto=1080):
     
     img_final = imagen.copy().convert('RGBA')
     
-    # Calcular tamaño óptimo para iconos basado en la cantidad
+    # Calcular tamaño óptimo para iconos basado en la cantidad - ICONOS MÁS GRANDES
     if len(iconos) == 1:
-        tamano_max_icono = int(ancho * 0.12)  # Un solo icono puede ser más grande
+        tamano_max_icono = int(ancho * 0.18)  # Un solo icono mucho más grande
     elif len(iconos) <= 3:
-        tamano_max_icono = int(ancho * 0.08)  # 2-3 iconos
+        tamano_max_icono = int(ancho * 0.14)  # 2-3 iconos más grandes
     else:
-        tamano_max_icono = int(ancho * 0.06)  # 4+ iconos más pequeños
+        tamano_max_icono = int(ancho * 0.10)  # 4+ iconos también más grandes
     
-    # Asegurar tamaño mínimo y máximo
-    tamano_max_icono = max(60, min(tamano_max_icono, 150))
+    # Asegurar tamaño mínimo y máximo - rangos más amplios
+    tamano_max_icono = max(100, min(tamano_max_icono, 250))
     
     # Redimensionar iconos a tamaño consistente
     iconos_redimensionados = []
@@ -399,43 +560,61 @@ def añadir_iconos(imagen, iconos, ancho=1920, alto=1080):
     # Posición inicial X para centrar la fila de iconos
     x_inicial = max(0, (ancho - ancho_total_con_espacios) // 2)
     
-    # Posición Y: 72% de la altura (más arriba para no cortarse)
+    # Posición Y: 68% de la altura (ajustado para mejor proporción con texto dinámico)
     # Asegurar que los iconos quepan dentro del canvas
     alto_max_icono = max(icono.height for icono in iconos_redimensionados)
-    y_iconos = min(int(alto * 0.72), alto - alto_max_icono - 20)  # 20px de margen inferior
+    y_iconos = min(int(alto * 0.68), alto - alto_max_icono - 20)  # 20px de margen inferior
     
+    # === CREAR SOMBRAS PARALELAS MEJORADAS PARA TODOS LOS ICONOS ===
     x_actual = x_inicial
-    
     for icono in iconos_redimensionados:
         # Centrar verticalmente cada icono en la línea base
         y_centrado = y_iconos + (alto_max_icono - icono.height) // 2
         
         # Verificar que el icono esté completamente dentro del canvas
         if x_actual + icono.width <= ancho and y_centrado + icono.height <= alto:
-            # Crear sombra más elegante
-            sombra = Image.new('RGBA', img_final.size, (0, 0, 0, 0))
-            draw_sombra = ImageDraw.Draw(sombra)
             
-            # Sombra suave y profesional
-            for offset in range(1, 6):
-                opacity = max(15, 40 - offset * 5)
+            # === SOMBRA PARALELA PROFESIONAL MEJORADA ===
+            # Especificaciones MEJORADAS: 85% opacidad (más opaca), 9px distancia, 40px blur
+            opacidad_sombra = int(255 * 0.85)  # ≈ 217 (más opaca que antes)
+            
+            # Crear múltiples capas de sombra para mayor profundidad
+            for desplazamiento in [12, 9, 6]:  # Múltiples sombras con diferentes desplazamientos
+                temp_sombra_icono = Image.new('RGBA', (ancho, alto), (0, 0, 0, 0))
+                
                 # Crear máscara de sombra usando el alpha del icono original
-                temp_sombra = Image.new('RGBA', icono.size, (0, 0, 0, 0))
                 for y in range(icono.height):
                     for x in range(icono.width):
                         r, g, b, a = icono.getpixel((x, y))
                         if a > 0:  # Solo donde hay contenido del icono
-                            temp_sombra.putpixel((x, y), (0, 0, 0, min(opacity, a)))
+                            # Posición con desplazamiento variable
+                            sombra_x = x_actual + x + desplazamiento
+                            sombra_y = y_centrado + y + desplazamiento
+                            
+                            # Verificar límites
+                            if 0 <= sombra_x < ancho and 0 <= sombra_y < alto:
+                                # Aplicar opacidad proporcional decreciente por capa
+                                alpha_capa = int(opacidad_sombra * (desplazamiento / 12) * (a / 255))
+                                temp_sombra_icono.putpixel((sombra_x, sombra_y), (0, 0, 0, alpha_capa))
                 
-                # Pegar sombra con offset
-                sombra.paste(temp_sombra, (x_actual + offset, y_centrado + offset), temp_sombra)
-            
-            # Aplicar blur a la sombra
-            sombra = sombra.filter(ImageFilter.GaussianBlur(radius=4))
-            
-            # Aplicar sombra
-            img_final = Image.alpha_composite(img_final, sombra)
-            
+                # Aplicar blur variable según la capa
+                blur_nivel = int(40 * (desplazamiento / 12))  # Blur más intenso para capas más lejanas
+                temp_sombra_icono = temp_sombra_icono.filter(ImageFilter.GaussianBlur(radius=blur_nivel))
+                
+                # Combinar con la imagen final
+                img_final = Image.alpha_composite(img_final, temp_sombra_icono)
+        
+        # Avanzar posición X
+        x_actual += icono.width + espaciado
+    
+    # === PEGAR ICONOS PRINCIPALES ===
+    x_actual = x_inicial
+    for icono in iconos_redimensionados:
+        # Centrar verticalmente cada icono en la línea base
+        y_centrado = y_iconos + (alto_max_icono - icono.height) // 2
+        
+        # Verificar que el icono esté completamente dentro del canvas
+        if x_actual + icono.width <= ancho and y_centrado + icono.height <= alto:
             # Pegar icono principal
             img_final.paste(icono, (x_actual, y_centrado), icono)
         
@@ -510,7 +689,7 @@ def generar_thumbnail(imagen_base, titulo, iconos, ruta_salida="thumbnail"):
         
         # 3. Procesar iconos
         mostrar_progreso(3, pasos_totales, "Procesando iconos...")
-        ancho_max_icono = int(1920 * 0.15)  # 15% del ancho
+        ancho_max_icono = int(1920 * 0.20)  # 20% del ancho para iconos más grandes
         iconos_procesados = procesar_iconos(iconos, ancho_max_icono)
         
         # 4. Añadir iconos
