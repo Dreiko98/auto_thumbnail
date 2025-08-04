@@ -1,0 +1,10 @@
+# Dependencias para Generador de Thumbnails
+Pillow>=10.0.0
+requests>=2.31.0
+
+# Dependencias para Web App
+Flask>=2.3.0
+Werkzeug>=2.3.0
+
+# Dependencias para empaquetado como app de escritorio
+PyInstaller>=5.10.0
