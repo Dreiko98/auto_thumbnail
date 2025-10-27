@@ -27,11 +27,20 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thumbnail_generator_2025'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB máximo
 
-# Directorio temporal para archivos subidos
-UPLOAD_FOLDER = tempfile.mkdtemp(prefix='thumbnail_uploads_')
-RESULTS_FOLDER = tempfile.mkdtemp(prefix='thumbnail_results_')
+# Directorio temporal para archivos subidos - usar carpetas del proyecto, no /tmp
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(SCRIPT_DIR, '.uploads')
+RESULTS_FOLDER = os.path.join(SCRIPT_DIR, '.results')
+
+# Crear carpetas si no existen
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULTS_FOLDER, exist_ok=True)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
+
+print(f"📁 Carpeta de uploads: {UPLOAD_FOLDER}")
+print(f"📁 Carpeta de resultados: {RESULTS_FOLDER}")
 
 # Extensiones permitidas
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'}
@@ -41,7 +50,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def cleanup_old_files():
-    """Limpia archivos temporales antiguos (más de 1 hora)."""
+    """Limpia archivos temporales antiguos (más de 24 horas) - NO se ejecuta en cada carga."""
     try:
         current_time = time.time()
         for folder in [UPLOAD_FOLDER, RESULTS_FOLDER]:
@@ -50,22 +59,26 @@ def cleanup_old_files():
                     file_path = os.path.join(folder, filename)
                     if os.path.isfile(file_path):
                         file_age = current_time - os.path.getctime(file_path)
-                        if file_age > 3600:  # 1 hora
-                            os.remove(file_path)
+                        if file_age > 86400:  # 24 horas - más conservador
+                            try:
+                                os.remove(file_path)
+                                print(f"🗑️  Archivo antiguo eliminado: {filename}")
+                            except OSError as e:
+                                print(f"⚠️  No se pudo eliminar {filename}: {e}")
     except Exception as e:
         print(f"Error limpiando archivos temporales: {e}")
 
 @app.route('/')
 def index():
     """Página principal de la aplicación."""
-    cleanup_old_files()
+    # No limpiar archivos en cada carga - hacerlo solo en shutdown
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     """Maneja la subida de archivos (imagen de fondo e iconos)."""
     try:
-        response = {'success': False, 'message': '', 'files': {}}
+        response = {'success': False, 'message': '', 'files': {'icons': []}}
         
         # Procesar imagen de fondo
         if 'background_image' in request.files:
@@ -91,11 +104,13 @@ def upload_file():
                     icons.append(unique_filename)
                     print(f"✅ Icono guardado: {unique_filename}")
         
-        if icons:
-            response['files']['icons'] = icons
+        # Siempre incluir icons en la respuesta (vacío si no hay)
+        response['files']['icons'] = icons
         
         response['success'] = True
         response['message'] = f"Archivos subidos correctamente. Fondo: {'✅' if 'background' in response['files'] else '❌'}, Iconos: {len(icons)}"
+        
+        print(f"📤 Respuesta /upload: success={response['success']}, background={'✅' if 'background' in response['files'] else '❌'}, icons={len(icons)}")
         
         return jsonify(response)
         
@@ -116,17 +131,38 @@ def generate_thumbnail():
             return jsonify({'success': False, 'message': 'La imagen de fondo es obligatoria'})
         
         # Preparar rutas de archivos
-        background_path = os.path.join(app.config['UPLOAD_FOLDER'], data['background_file'])
+        background_file = data.get('background_file')
+        print(f"📥 background_file recibido: {background_file}")
+        background_path = os.path.join(app.config['UPLOAD_FOLDER'], background_file)
+        print(f"   📂 Ruta construida: {background_path}")
+        print(f"   ✓ Existe: {os.path.exists(background_path)}")
+        
         if not os.path.exists(background_path):
+            print(f"   ❌ ARCHIVO NO ENCONTRADO!")
+            print(f"   📂 Contenido de {app.config['UPLOAD_FOLDER']}:")
+            try:
+                for f in os.listdir(app.config['UPLOAD_FOLDER']):
+                    print(f"      - {f}")
+            except Exception as e:
+                print(f"      Error listando: {e}")
             return jsonify({'success': False, 'message': 'Imagen de fondo no encontrada'})
         
         # Preparar iconos
         icon_paths = []
-        if data.get('icon_files'):
-            for icon_file in data['icon_files']:
+        icon_files = data.get('icon_files', [])
+        print(f"📥 icon_files recibido: {icon_files} (type: {type(icon_files)})")
+        
+        if icon_files and isinstance(icon_files, list) and len(icon_files) > 0:
+            for icon_file in icon_files:
                 icon_path = os.path.join(app.config['UPLOAD_FOLDER'], icon_file)
+                print(f"   🔍 Verificando icono: {icon_path}")
                 if os.path.exists(icon_path):
                     icon_paths.append(icon_path)
+                    print(f"   ✅ Icono encontrado: {icon_file}")
+                else:
+                    print(f"   ❌ Icono NO encontrado: {icon_file}")
+        
+        print(f"📤 Iconos a procesar: {len(icon_paths)}")
         
         # Generar nombre único para el resultado
         result_id = uuid.uuid4().hex

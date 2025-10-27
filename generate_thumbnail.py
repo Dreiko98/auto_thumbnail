@@ -482,6 +482,8 @@ def procesar_iconos(lista_iconos, ancho_max_por_icono):
                     icono = icono.convert('RGBA')
                 else:
                     icono = icono.convert('RGBA')
+            elif icono.mode == 'LA':
+                icono = icono.convert('RGBA')
             
             # Redimensionar manteniendo aspecto
             ratio = icono.width / icono.height
@@ -493,6 +495,9 @@ def procesar_iconos(lista_iconos, ancho_max_por_icono):
                 nuevo_ancho = int(nuevo_alto * ratio)
             
             icono_redimensionado = icono.resize((nuevo_ancho, nuevo_alto), Image.Resampling.LANCZOS)
+            # Asegurar que el icono redimensionado está en RGBA
+            if icono_redimensionado.mode != 'RGBA':
+                icono_redimensionado = icono_redimensionado.convert('RGBA')
             iconos_procesados.append(icono_redimensionado)
             
         except Exception as e:
@@ -585,7 +590,13 @@ def añadir_iconos(imagen, iconos, ancho=1920, alto=1080):
                 # Crear máscara de sombra usando el alpha del icono original
                 for y in range(icono.height):
                     for x in range(icono.width):
-                        r, g, b, a = icono.getpixel((x, y))
+                        pixel = icono.getpixel((x, y))
+                        # Manejar tanto RGB como RGBA
+                        if len(pixel) == 4:
+                            r, g, b, a = pixel
+                        else:
+                            r, g, b = pixel
+                            a = 255  # Asumir opacidad completa para RGB
                         if a > 0:  # Solo donde hay contenido del icono
                             # Posición con desplazamiento variable
                             sombra_x = x_actual + x + desplazamiento

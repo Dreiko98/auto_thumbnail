@@ -1,11 +1,20 @@
 #!/bin/bash
 # Instalador automático con entorno virtual
 
+set -e  # Salir si hay error
+
 echo "=== Instalando dependencias para Generador de Thumbnails ==="
 
-# Crear entorno virtual si no existe
-if [ ! -d ".venv" ]; then
+# Verificar si ya estamos en un entorno virtual
+if [[ "$VIRTUAL_ENV" != "" ]]; then
+    echo "⚠️  Ya hay un entorno virtual activo. Desactivando..."
+    deactivate 2>/dev/null || true
+fi
+
+# Crear entorno virtual si no existe o recrear si está corrupto
+if [ ! -d ".venv" ] || [ ! -f ".venv/bin/activate" ]; then
     echo "📦 Creando entorno virtual..."
+    rm -rf .venv 2>/dev/null || true
     python3 -m venv .venv
 fi
 
@@ -13,15 +22,25 @@ fi
 echo "🔄 Activando entorno virtual..."
 source .venv/bin/activate
 
+# Verificar que estamos en el entorno virtual
+if [[ "$VIRTUAL_ENV" == "" ]]; then
+    echo "❌ Error: No se pudo activar el entorno virtual"
+    exit 1
+fi
+
 # Actualizar pip
 echo "⬆️ Actualizando pip..."
-pip install --upgrade pip
+pip install --upgrade pip --break-system-packages
 
 # Instalar dependencias
 echo "📚 Instalando dependencias..."
-pip install -r requirements.txt
+if pip install -r requirements.txt --break-system-packages; then
+    echo "✓ Dependencias instaladas correctamente"
+else
+    echo "❌ Error instalando dependencias"
+    exit 1
+fi
 
-echo "✓ Dependencias instaladas correctamente"
 echo ""
 echo "🎨 FORMAS DE USAR EL GENERADOR:"
 echo ""
