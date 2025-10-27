@@ -673,39 +673,84 @@ def guardar_como_psd_simulado(imagen_fondo, imagen_con_titulo, iconos, titulo, r
     print(f"Capas PSD simuladas guardadas en: {directorio_capas}")
 
 
-def generar_thumbnail(imagen_base, titulo, iconos, ruta_salida="thumbnail"):
+def generar_thumbnail(imagen_base, titulo, iconos, ruta_salida="thumbnail", tipo_plantilla=1, texto1=None, texto2=None, foto_persona=None, texto_plantilla3=None, icono1_plantilla3=None, icono2_plantilla3=None, is_instagram_plantilla3=False):
     """
     Función principal que genera el thumbnail completo.
     
     Args:
         imagen_base (str): Ruta o URL de la imagen base
-        titulo (str): Título a mostrar
-        iconos (list): Lista de rutas/URLs de iconos
+        titulo (str): Título a mostrar (usado en plantilla 1)
+        iconos (list): Lista de rutas/URLs de iconos (usado en plantilla 1)
         ruta_salida (str): Nombre base para archivos de salida
+        tipo_plantilla (int): Tipo de plantilla a usar (1, 2, o 3)
+        texto1 (str): Texto 1 para plantilla 2
+        texto2 (str): Texto 2 para plantilla 2
+        foto_persona (str): Ruta de foto de persona para plantilla 2
+        texto_plantilla3 (str): Texto para plantilla 3
+        icono1_plantilla3 (str): Ruta del icono 1 para plantilla 3
+        icono2_plantilla3 (str): Ruta del icono 2 para plantilla 3
+        is_instagram_plantilla3 (bool): Si True, genera formato Instagram (1080x1080) para plantilla 3
     """
     print("\n🚀 INICIANDO GENERACIÓN DE THUMBNAIL")
     print("═" * 60)
+    print(f"📋 Plantilla seleccionada: {tipo_plantilla}")
     
     pasos_totales = 5
     
     try:
-        # 1. Cargar y procesar imagen base
-        mostrar_progreso(1, pasos_totales, "Descargando y procesando imagen base...")
-        img_original = descargar_imagen(imagen_base)
-        img_fondo = procesar_imagen_base(img_original)
+        # Verificar tipo de plantilla
+        if tipo_plantilla not in [1, 2, 3]:
+            print(f"⚠️  Tipo de plantilla inválido ({tipo_plantilla}), usando plantilla 1")
+            tipo_plantilla = 1
         
-        # 2. Añadir título con sombras
-        mostrar_progreso(2, pasos_totales, "Añadiendo título con efectos...")
-        img_con_titulo = añadir_titulo(img_fondo, titulo)
-        
-        # 3. Procesar iconos
-        mostrar_progreso(3, pasos_totales, "Procesando iconos...")
-        ancho_max_icono = int(1920 * 0.20)  # 20% del ancho para iconos más grandes
-        iconos_procesados = procesar_iconos(iconos, ancho_max_icono)
-        
-        # 4. Añadir iconos
-        mostrar_progreso(4, pasos_totales, "Integrando iconos...")
-        img_final = añadir_iconos(img_con_titulo, iconos_procesados)
+        # Plantilla 1: Implementación original
+        if tipo_plantilla == 1:
+            # Plantilla 1: La actual (implementación original)
+            # 1. Cargar y procesar imagen base
+            mostrar_progreso(1, pasos_totales, "Descargando y procesando imagen base...")
+            img_original = descargar_imagen(imagen_base)
+            img_fondo = procesar_imagen_base(img_original)
+            
+            # 2. Añadir título con sombras
+            mostrar_progreso(2, pasos_totales, "Añadiendo título con efectos...")
+            img_con_titulo = añadir_titulo(img_fondo, titulo)
+            
+            # 3. Procesar iconos
+            mostrar_progreso(3, pasos_totales, "Procesando iconos...")
+            ancho_max_icono = int(1920 * 0.20)  # 20% del ancho para iconos más grandes
+            iconos_procesados = procesar_iconos(iconos, ancho_max_icono)
+            
+            # 4. Añadir iconos
+            mostrar_progreso(4, pasos_totales, "Integrando iconos...")
+            img_final = añadir_iconos(img_con_titulo, iconos_procesados)
+            
+        elif tipo_plantilla == 2:
+            # Plantilla 2: Dos textos y foto de persona
+            print("🎬 Usando Plantilla 2 - Dos textos y foto de persona")
+            
+            # Validar que tenemos todos los datos necesarios
+            if not texto1 or not texto2 or not foto_persona:
+                print("⚠️  Faltan datos para plantilla 2, usando plantilla básica...")
+                img_original = descargar_imagen(imagen_base)
+                img_final = procesar_imagen_base(img_original)
+            else:
+                # Llamar a la función específica de plantilla 2
+                generar_thumbnail_plantilla2(imagen_base, texto1, texto2, foto_persona, ruta_salida)
+                return  # Salir porque la función ya guardó el archivo
+            
+        elif tipo_plantilla == 3:
+            # Plantilla 3: Texto centrado + 2 iconos en esquinas (sin desenfoque)
+            print("🎬 Usando Plantilla 3 - Texto y dos iconos en esquinas")
+            
+            # Validar que tenemos todos los datos necesarios
+            if not texto_plantilla3 or not icono1_plantilla3 or not icono2_plantilla3:
+                print("⚠️  Faltan datos para plantilla 3, usando plantilla básica...")
+                img_original = descargar_imagen(imagen_base)
+                img_final = procesar_imagen_base(img_original)
+            else:
+                # Llamar a la función específica de plantilla 3
+                generar_thumbnail_plantilla3(imagen_base, texto_plantilla3, icono1_plantilla3, icono2_plantilla3, ruta_salida, is_instagram_plantilla3)
+                return  # Salir porque la función ya guardó el archivo
         
         # 5. Guardar resultados
         mostrar_progreso(5, pasos_totales, "Guardando archivos...")
@@ -714,21 +759,25 @@ def generar_thumbnail(imagen_base, titulo, iconos, ruta_salida="thumbnail"):
         ruta_png = f"{ruta_salida}.png"
         img_final.save(ruta_png, "PNG", optimize=False, compress_level=1)
         
-        # Guardar PSD simulado
-        ruta_psd = f"{ruta_salida}.psd"
-        guardar_como_psd_simulado(img_fondo, img_con_titulo, iconos_procesados, titulo, ruta_psd)
+        # Guardar PSD simulado solo para plantilla 1
+        if tipo_plantilla == 1:
+            ruta_psd = f"{ruta_salida}.psd"
+            guardar_como_psd_simulado(img_fondo, img_con_titulo, iconos_procesados, titulo, ruta_psd)
         
         print()
         print("✅ GENERACIÓN COMPLETADA CON ÉXITO")
         print("╔" + "═" * 58 + "╗")
         print("║" + "📁 ARCHIVOS GENERADOS:".ljust(58) + "║")
         print("║" + f"   🖼️  {ruta_png}".ljust(58) + "║")
-        print("║" + f"   📂 {ruta_salida}_capas/ (capas separadas)".ljust(58) + "║")
+        if tipo_plantilla == 1:
+            print("║" + f"   📂 {ruta_salida}_capas/ (capas separadas)".ljust(58) + "║")
         print("║" + " " * 58 + "║")
         print("║" + f"📊 ESTADÍSTICAS:".ljust(58) + "║")
         print("║" + f"   • Resolución: 1920x1080 píxeles".ljust(58) + "║")
-        print("║" + f"   • Líneas de texto: {len(dividir_texto_en_lineas(titulo, obtener_fuente(130), 1536))}".ljust(58) + "║")
-        print("║" + f"   • Iconos: {len(iconos)}".ljust(58) + "║")
+        print("║" + f"   • Plantilla: {tipo_plantilla}".ljust(58) + "║")
+        if tipo_plantilla == 1:
+            print("║" + f"   • Líneas de texto: {len(dividir_texto_en_lineas(titulo, obtener_fuente(130), 1536))}".ljust(58) + "║")
+            print("║" + f"   • Iconos: {len(iconos)}".ljust(58) + "║")
         print("║" + f"   • Tamaño archivo: ~{os.path.getsize(ruta_png) // 1024} KB".ljust(58) + "║")
         print("╚" + "═" * 58 + "╝")
         print()
@@ -741,6 +790,483 @@ def generar_thumbnail(imagen_base, titulo, iconos, ruta_salida="thumbnail"):
         print("   • Verifica que la imagen base sea válida")
         print("   • Comprueba tu conexión a internet para URLs")
         print("   • Asegúrate de tener permisos de escritura")
+        raise
+
+
+def generar_thumbnail_plantilla2(imagen_base, texto1, texto2, foto_persona, ruta_salida="thumbnail"):
+    """
+    Genera thumbnail con Plantilla 2: imagen de fondo con dos textos y foto de persona centrada.
+    
+    Args:
+        imagen_base (str): Ruta o URL de la imagen de fondo
+        texto1 (str): Texto a mostrar en la parte izquierda superior
+        texto2 (str): Texto a mostrar en la parte derecha superior
+        foto_persona (str): Ruta de la foto de persona (PNG con transparencia)
+        ruta_salida (str): Nombre base para archivos de salida
+    """
+    print("\n🚀 INICIANDO GENERACIÓN DE THUMBNAIL - PLANTILLA 2")
+    print("═" * 60)
+    
+    ANCHO = 1920
+    ALTO = 1080
+    
+    try:
+        # 1. Cargar y procesar imagen de fondo
+        print("📸 Procesando imagen de fondo...")
+        img_original = descargar_imagen(imagen_base)
+        img_fondo = procesar_imagen_base(img_original, ANCHO, ALTO)
+        
+        # Convertir a RGBA para soportar transparencias
+        img_fondo = img_fondo.convert('RGBA')
+        
+        # 2. Crear capa para los textos
+        print("📝 Añadiendo textos...")
+        capa_texto = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(capa_texto)
+        
+        # Configuración de fuente para los textos
+        tamano_fuente = 100  # Tamaño base para los textos
+        fuente = obtener_fuente(tamano_fuente)
+        
+        # Posición Y para los textos (parte superior, aproximadamente 15% desde arriba para dar espacio a múltiples líneas)
+        y_texto_inicial = int(ALTO * 0.15)
+        
+        # Calcular altura de línea para saltos de línea
+        bbox_linea = fuente.getbbox("Ay")
+        alto_linea = bbox_linea[3] - bbox_linea[1]
+        espaciado_lineas = int(alto_linea * 0.2)  # 20% de espacio entre líneas
+        
+        # ============================================
+        # TEXTO 1 - Izquierda (con saltos de línea)
+        # ============================================
+        
+        # Calcular ancho máximo disponible para texto 1
+        # Desde el 8% hasta el 45% del ancho total
+        x_inicio_texto1 = int(ANCHO * 0.08)
+        limite_derecho_texto1 = int(ANCHO * 0.45)
+        ancho_max_texto1 = limite_derecho_texto1 - x_inicio_texto1
+        
+        # Dividir texto 1 en líneas
+        lineas_texto1 = dividir_texto_en_lineas(texto1, fuente, ancho_max_texto1)
+        print(f"   📝 Texto 1: {len(lineas_texto1)} línea(s)")
+        
+        # Dibujar cada línea del texto 1 con sombras
+        y_actual_texto1 = y_texto_inicial
+        for linea in lineas_texto1:
+            # Dibujar sombra multicapa profesional
+            for offset in range(12, 0, -1):
+                opacidad = int(200 * (offset / 12))
+                draw.text(
+                    (x_inicio_texto1 + offset, y_actual_texto1 + offset),
+                    linea,
+                    font=fuente,
+                    fill=(0, 0, 0, opacidad)
+                )
+            
+            # Dibujar texto en blanco
+            draw.text((x_inicio_texto1, y_actual_texto1), linea, font=fuente, fill=(255, 255, 255, 255))
+            
+            # Avanzar a la siguiente línea
+            y_actual_texto1 += alto_linea + espaciado_lineas
+        
+        # ============================================
+        # TEXTO 2 - Derecha (con saltos de línea)
+        # ============================================
+        
+        # Calcular ancho máximo disponible para texto 2
+        # Desde el 55% hasta el 92% del ancho total
+        limite_izquierdo_texto2 = int(ANCHO * 0.55)
+        x_fin_texto2 = int(ANCHO * 0.92)
+        ancho_max_texto2 = x_fin_texto2 - limite_izquierdo_texto2
+        
+        # Dividir texto 2 en líneas
+        lineas_texto2 = dividir_texto_en_lineas(texto2, fuente, ancho_max_texto2)
+        print(f"   📝 Texto 2: {len(lineas_texto2)} línea(s)")
+        
+        # Dibujar cada línea del texto 2 con sombras (alineado a la derecha)
+        y_actual_texto2 = y_texto_inicial
+        for linea in lineas_texto2:
+            # Calcular ancho de esta línea para alinear a la derecha
+            bbox_linea_actual = fuente.getbbox(linea)
+            ancho_linea_actual = bbox_linea_actual[2] - bbox_linea_actual[0]
+            x_linea_texto2 = x_fin_texto2 - ancho_linea_actual
+            
+            # Dibujar sombra multicapa profesional
+            for offset in range(12, 0, -1):
+                opacidad = int(200 * (offset / 12))
+                draw.text(
+                    (x_linea_texto2 + offset, y_actual_texto2 + offset),
+                    linea,
+                    font=fuente,
+                    fill=(0, 0, 0, opacidad)
+                )
+            
+            # Dibujar texto en blanco
+            draw.text((x_linea_texto2, y_actual_texto2), linea, font=fuente, fill=(255, 255, 255, 255))
+            
+            # Avanzar a la siguiente línea
+            y_actual_texto2 += alto_linea + espaciado_lineas
+        
+        # Aplicar blur suave a la capa de texto para mejorar sombras
+        capa_texto = capa_texto.filter(ImageFilter.GaussianBlur(radius=1))
+        
+        # 3. Combinar fondo con textos
+        img_con_textos = Image.alpha_composite(img_fondo, capa_texto)
+        
+        # 4. Cargar y procesar foto de persona
+        print("👤 Procesando foto de persona...")
+        foto = descargar_imagen(foto_persona)
+        
+        # Asegurarse de que la foto tenga canal alpha
+        if foto.mode != 'RGBA':
+            foto = foto.convert('RGBA')
+        
+        # Calcular altura proporcional de la foto
+        # La foto ocupará aproximadamente el 80% de la altura total
+        altura_foto_objetivo = int(ALTO * 0.80)
+        
+        # Calcular escala manteniendo proporción
+        escala = altura_foto_objetivo / foto.height
+        nuevo_ancho = int(foto.width * escala)
+        nueva_altura = int(foto.height * escala)
+        
+        # Redimensionar foto
+        foto_redimensionada = foto.resize((nuevo_ancho, nueva_altura), Image.Resampling.LANCZOS)
+        
+        # 5. CREAR SOMBRA PARALELA PARA LA FOTO DE PERSONA
+        print("🎨 Aplicando sombra profesional a la foto...")
+        
+        # Crear una capa para las sombras de la foto
+        capa_sombra_foto = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+        
+        # Posición de la foto (centrado horizontal, alineado al borde inferior)
+        x_foto = (ANCHO - nuevo_ancho) // 2
+        y_foto = ALTO - nueva_altura
+        
+        # Crear múltiples capas de sombra con diferentes desplazamientos y blur
+        for i, (desplazamiento, blur_radio, opacidad_base) in enumerate([
+            (25, 35, 0.4),   # Sombra más lejana y difusa
+            (18, 25, 0.5),   # Sombra intermedia
+            (12, 18, 0.6),   # Sombra cercana
+            (6, 10, 0.7)     # Sombra más cercana
+        ]):
+            # Crear capa temporal para esta sombra
+            temp_sombra = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+            
+            # Crear máscara de sombra desde la foto
+            # Usar el canal alpha de la foto como base para la sombra
+            sombra_mask = Image.new('RGBA', foto_redimensionada.size, (0, 0, 0, 0))
+            sombra_draw = ImageDraw.Draw(sombra_mask)
+            
+            # Extraer el canal alpha de la foto para usar como máscara
+            if foto_redimensionada.mode == 'RGBA':
+                alpha_channel = foto_redimensionada.split()[3]
+                # Crear imagen negra con la forma de la foto
+                sombra_base = Image.new('RGB', foto_redimensionada.size, (0, 0, 0))
+                sombra_base.putalpha(alpha_channel)
+                
+                # Ajustar opacidad de la sombra
+                sombra_con_opacidad = Image.new('RGBA', foto_redimensionada.size, (0, 0, 0, 0))
+                for x in range(sombra_base.width):
+                    for y in range(sombra_base.height):
+                        pixel = sombra_base.getpixel((x, y))
+                        if len(pixel) == 4 and pixel[3] > 0:
+                            nueva_opacidad = int(pixel[3] * opacidad_base)
+                            sombra_con_opacidad.putpixel((x, y), (0, 0, 0, nueva_opacidad))
+                
+                # Posicionar sombra con desplazamiento
+                x_sombra = x_foto + desplazamiento
+                y_sombra = y_foto + desplazamiento
+                
+                # Pegar en la capa temporal
+                temp_sombra.paste(sombra_con_opacidad, (x_sombra, y_sombra), sombra_con_opacidad)
+                
+                # Aplicar blur gaussiano
+                temp_sombra = temp_sombra.filter(ImageFilter.GaussianBlur(radius=blur_radio))
+                
+                # Combinar con la capa de sombras
+                capa_sombra_foto = Image.alpha_composite(capa_sombra_foto, temp_sombra)
+        
+        # 6. Combinar todo: fondo + textos + sombras + foto
+        print("🔨 Combinando todas las capas...")
+        
+        # Combinar fondo con textos (ya lo teníamos)
+        img_con_sombras = Image.alpha_composite(img_con_textos, capa_sombra_foto)
+        
+        # Finalmente pegar la foto encima de las sombras
+        img_final = img_con_sombras.copy()
+        img_final.paste(foto_redimensionada, (x_foto, y_foto), foto_redimensionada)
+        
+        # 7. Guardar resultado
+        print("💾 Guardando archivo...")
+        ruta_png = f"{ruta_salida}.png"
+        
+        # Convertir a RGB para guardar como PNG sin canal alpha
+        img_final_rgb = Image.new('RGB', (ANCHO, ALTO), (255, 255, 255))
+        img_final_rgb.paste(img_final, (0, 0), img_final)
+        img_final_rgb.save(ruta_png, "PNG", optimize=False, compress_level=1)
+        
+        print()
+        print("✅ GENERACIÓN COMPLETADA CON ÉXITO")
+        print("╔" + "═" * 58 + "╗")
+        print("║" + "📁 ARCHIVOS GENERADOS:".ljust(58) + "║")
+        print("║" + f"   🖼️  {ruta_png}".ljust(58) + "║")
+        print("║" + " " * 58 + "║")
+        print("║" + f"📊 ESTADÍSTICAS:".ljust(58) + "║")
+        print("║" + f"   • Resolución: 1920x1080 píxeles".ljust(58) + "║")
+        print("║" + f"   • Plantilla: 2".ljust(58) + "║")
+        print("║" + f"   • Tamaño archivo: ~{os.path.getsize(ruta_png) // 1024} KB".ljust(58) + "║")
+        print("╚" + "═" * 58 + "╝")
+        print()
+        print("🎉 ¡Tu thumbnail está listo para usar!")
+        
+    except Exception as e:
+        print(f"\n❌ ERROR DURANTE LA GENERACIÓN:")
+        print(f"   {str(e)}")
+        raise
+
+
+def generar_thumbnail_plantilla3(imagen_base, texto, icono1, icono2, ruta_salida="thumbnail", is_instagram=False):
+    """
+    Genera thumbnail con Plantilla 3: imagen de fondo SIN desenfoque, texto arriba centrado y dos iconos en esquinas inferiores.
+    
+    Args:
+        imagen_base (str): Ruta o URL de la imagen de fondo (NO se desenfoca)
+        texto (str): Texto a mostrar en la parte superior centrado
+        icono1 (str): Ruta del icono para esquina inferior izquierda
+        icono2 (str): Ruta del icono para esquina inferior derecha
+        ruta_salida (str): Nombre base para archivos de salida
+        is_instagram (bool): Si es True, genera en formato 4:3 (1080x1080) en lugar de 16:9
+    """
+    print("\n🚀 INICIANDO GENERACIÓN DE THUMBNAIL - PLANTILLA 3")
+    if is_instagram:
+        print("📸 MODO: Instagram Post (1080x1080 - 4:3)")
+    print("═" * 60)
+    
+    # Configurar dimensiones según el formato
+    if is_instagram:
+        ANCHO = 1080
+        ALTO = 1080
+    else:
+        ANCHO = 1920
+        ALTO = 1080
+    
+    try:
+        # 1. Cargar y procesar imagen de fondo (SIN DESENFOQUE)
+        print("📸 Procesando imagen de fondo (sin desenfoque)...")
+        img_original = descargar_imagen(imagen_base)
+        
+        # Redimensionar manteniendo aspecto, pero SIN aplicar desenfoque
+        if img_original.mode != 'RGB':
+            img_original = img_original.convert('RGB')
+        
+        # Calcular dimensiones manteniendo aspecto
+        ratio_original = img_original.width / img_original.height
+        ratio_objetivo = ANCHO / ALTO
+        
+        if ratio_original > ratio_objetivo:
+            # La imagen es más ancha, ajustar por altura
+            nuevo_alto = ALTO
+            nuevo_ancho = int(ALTO * ratio_original)
+        else:
+            # La imagen es más alta, ajustar por ancho
+            nuevo_ancho = ANCHO
+            nuevo_alto = int(ANCHO / ratio_original)
+        
+        # Redimensionar
+        img_redimensionada = img_original.resize((nuevo_ancho, nuevo_alto), Image.Resampling.LANCZOS)
+        
+        # Centrar y recortar
+        x_crop = (nuevo_ancho - ANCHO) // 2
+        y_crop = (nuevo_alto - ALTO) // 2
+        img_fondo = img_redimensionada.crop((x_crop, y_crop, x_crop + ANCHO, y_crop + ALTO))
+        
+        # Convertir a RGBA para soportar transparencias
+        img_fondo = img_fondo.convert('RGBA')
+        
+        # 2. Crear capa para el texto
+        print("📝 Añadiendo texto...")
+        capa_texto = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(capa_texto)
+        
+        # Configuración de fuente para el texto (proporcional al ancho)
+        # Para formato Instagram, usar fuente más grande y más gruesa
+        if is_instagram:
+            tamano_fuente = int(ANCHO * 0.065)  # 6.5% del ancho (~70px para 1080px)
+        else:
+            tamano_fuente = int(ANCHO * 0.0365)  # 3.65% del ancho (~70px para 1920px)
+        fuente = obtener_fuente(tamano_fuente)
+        
+        # Calcular ancho máximo para el texto (con márgenes del 8% a cada lado)
+        margen_lateral = int(ANCHO * 0.08)
+        ancho_max_texto = ANCHO - (2 * margen_lateral)
+        
+        # Dividir texto en líneas
+        lineas_texto = dividir_texto_en_lineas(texto, fuente, ancho_max_texto)
+        print(f"   📝 Texto: {len(lineas_texto)} línea(s)")
+        
+        # Calcular altura de línea
+        bbox_linea = fuente.getbbox("Ay")
+        alto_linea = bbox_linea[3] - bbox_linea[1]
+        espaciado_lineas = int(alto_linea * 0.2)
+        
+        # Calcular altura total del bloque de texto
+        alto_total_texto = len(lineas_texto) * alto_linea + (len(lineas_texto) - 1) * espaciado_lineas
+        
+        # Posición Y inicial (más arriba, 5% desde arriba)
+        y_texto_inicial = int(ALTO * 0.05)
+        
+        # Dibujar cada línea centrada con sombras
+        y_actual = y_texto_inicial
+        for linea in lineas_texto:
+            # Calcular ancho de esta línea para centrarla
+            bbox_linea_actual = fuente.getbbox(linea)
+            ancho_linea = bbox_linea_actual[2] - bbox_linea_actual[0]
+            x_centrado = (ANCHO - ancho_linea) // 2
+            
+            # Dibujar sombra multicapa profesional
+            for offset in range(15, 0, -1):
+                opacidad = int(220 * (offset / 15))
+                draw.text(
+                    (x_centrado + offset, y_actual + offset),
+                    linea,
+                    font=fuente,
+                    fill=(0, 0, 0, opacidad)
+                )
+            
+            # Dibujar texto en blanco
+            draw.text((x_centrado, y_actual), linea, font=fuente, fill=(255, 255, 255, 255))
+            
+            # Avanzar a la siguiente línea
+            y_actual += alto_linea + espaciado_lineas
+        
+        # Aplicar blur suave a la capa de texto
+        capa_texto = capa_texto.filter(ImageFilter.GaussianBlur(radius=1))
+        
+        # 3. Combinar fondo con texto
+        img_con_texto = Image.alpha_composite(img_fondo, capa_texto)
+        
+        # 4. Procesar y añadir ICONO 1 (esquina inferior izquierda)
+        print("🎯 Procesando iconos...")
+        
+        if icono1:
+            icono1_img = descargar_imagen(icono1)
+            if icono1_img.mode != 'RGBA':
+                icono1_img = icono1_img.convert('RGBA')
+            
+            # Redimensionar icono 1 (10% del ancho total, más pequeño y discreto)
+            ancho_icono_objetivo = int(ANCHO * 0.10)
+            escala = ancho_icono_objetivo / icono1_img.width
+            nuevo_ancho_icono1 = int(icono1_img.width * escala)
+            nuevo_alto_icono1 = int(icono1_img.height * escala)
+            icono1_redimensionado = icono1_img.resize((nuevo_ancho_icono1, nuevo_alto_icono1), Image.Resampling.LANCZOS)
+            
+            # Posición en esquina inferior izquierda (con margen del 3%, más pegado al borde)
+            margen_icono = int(ANCHO * 0.03)
+            x_icono1 = margen_icono
+            y_icono1 = ALTO - nuevo_alto_icono1 - margen_icono
+            
+            # Crear capa con sombra para el icono
+            capa_sombra_icono1 = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+            
+            # Crear sombras para el icono 1
+            for desplazamiento, blur_radio, opacidad_base in [(12, 20, 0.5), (8, 12, 0.6), (4, 6, 0.7)]:
+                temp_sombra = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+                
+                if icono1_redimensionado.mode == 'RGBA':
+                    alpha_channel = icono1_redimensionado.split()[3]
+                    sombra_base = Image.new('RGB', icono1_redimensionado.size, (0, 0, 0))
+                    sombra_base.putalpha(alpha_channel)
+                    
+                    sombra_con_opacidad = Image.new('RGBA', icono1_redimensionado.size, (0, 0, 0, 0))
+                    for x in range(sombra_base.width):
+                        for y in range(sombra_base.height):
+                            pixel = sombra_base.getpixel((x, y))
+                            if len(pixel) == 4 and pixel[3] > 0:
+                                nueva_opacidad = int(pixel[3] * opacidad_base)
+                                sombra_con_opacidad.putpixel((x, y), (0, 0, 0, nueva_opacidad))
+                    
+                    temp_sombra.paste(sombra_con_opacidad, (x_icono1 + desplazamiento, y_icono1 + desplazamiento), sombra_con_opacidad)
+                    temp_sombra = temp_sombra.filter(ImageFilter.GaussianBlur(radius=blur_radio))
+                    capa_sombra_icono1 = Image.alpha_composite(capa_sombra_icono1, temp_sombra)
+            
+            # Combinar sombra y luego el icono
+            img_con_texto = Image.alpha_composite(img_con_texto, capa_sombra_icono1)
+            img_con_texto.paste(icono1_redimensionado, (x_icono1, y_icono1), icono1_redimensionado)
+        
+        # 5. Procesar y añadir ICONO 2 (esquina inferior derecha)
+        if icono2:
+            icono2_img = descargar_imagen(icono2)
+            if icono2_img.mode != 'RGBA':
+                icono2_img = icono2_img.convert('RGBA')
+            
+            # Redimensionar icono 2 (10% del ancho total, más pequeño y discreto)
+            ancho_icono_objetivo = int(ANCHO * 0.10)
+            escala = ancho_icono_objetivo / icono2_img.width
+            nuevo_ancho_icono2 = int(icono2_img.width * escala)
+            nuevo_alto_icono2 = int(icono2_img.height * escala)
+            icono2_redimensionado = icono2_img.resize((nuevo_ancho_icono2, nuevo_alto_icono2), Image.Resampling.LANCZOS)
+            
+            # Posición en esquina inferior derecha (con margen del 3%, más pegado al borde)
+            x_icono2 = ANCHO - nuevo_ancho_icono2 - margen_icono
+            y_icono2 = ALTO - nuevo_alto_icono2 - margen_icono
+            
+            # Crear capa con sombra para el icono
+            capa_sombra_icono2 = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+            
+            # Crear sombras para el icono 2
+            for desplazamiento, blur_radio, opacidad_base in [(12, 20, 0.5), (8, 12, 0.6), (4, 6, 0.7)]:
+                temp_sombra = Image.new('RGBA', (ANCHO, ALTO), (0, 0, 0, 0))
+                
+                if icono2_redimensionado.mode == 'RGBA':
+                    alpha_channel = icono2_redimensionado.split()[3]
+                    sombra_base = Image.new('RGB', icono2_redimensionado.size, (0, 0, 0))
+                    sombra_base.putalpha(alpha_channel)
+                    
+                    sombra_con_opacidad = Image.new('RGBA', icono2_redimensionado.size, (0, 0, 0, 0))
+                    for x in range(sombra_base.width):
+                        for y in range(sombra_base.height):
+                            pixel = sombra_base.getpixel((x, y))
+                            if len(pixel) == 4 and pixel[3] > 0:
+                                nueva_opacidad = int(pixel[3] * opacidad_base)
+                                sombra_con_opacidad.putpixel((x, y), (0, 0, 0, nueva_opacidad))
+                    
+                    temp_sombra.paste(sombra_con_opacidad, (x_icono2 + desplazamiento, y_icono2 + desplazamiento), sombra_con_opacidad)
+                    temp_sombra = temp_sombra.filter(ImageFilter.GaussianBlur(radius=blur_radio))
+                    capa_sombra_icono2 = Image.alpha_composite(capa_sombra_icono2, temp_sombra)
+            
+            # Combinar sombra y luego el icono
+            img_con_texto = Image.alpha_composite(img_con_texto, capa_sombra_icono2)
+            img_con_texto.paste(icono2_redimensionado, (x_icono2, y_icono2), icono2_redimensionado)
+        
+        # 6. Guardar resultado
+        print("💾 Guardando archivo...")
+        ruta_png = f"{ruta_salida}.png"
+        
+        # Convertir a RGB para guardar
+        img_final_rgb = Image.new('RGB', (ANCHO, ALTO), (255, 255, 255))
+        img_final_rgb.paste(img_con_texto, (0, 0), img_con_texto)
+        img_final_rgb.save(ruta_png, "PNG", optimize=False, compress_level=1)
+        
+        print()
+        print("✅ GENERACIÓN COMPLETADA CON ÉXITO")
+        print("╔" + "═" * 58 + "╗")
+        print("║" + "📁 ARCHIVOS GENERADOS:".ljust(58) + "║")
+        print("║" + f"   🖼️  {ruta_png}".ljust(58) + "║")
+        print("║" + " " * 58 + "║")
+        print("║" + f"📊 ESTADÍSTICAS:".ljust(58) + "║")
+        print("║" + f"   • Resolución: 1920x1080 píxeles".ljust(58) + "║")
+        print("║" + f"   • Plantilla: 3".ljust(58) + "║")
+        print("║" + f"   • Líneas de texto: {len(lineas_texto)}".ljust(58) + "║")
+        print("║" + f"   • Iconos: 2".ljust(58) + "║")
+        print("║" + f"   • Tamaño archivo: ~{os.path.getsize(ruta_png) // 1024} KB".ljust(58) + "║")
+        print("╚" + "═" * 58 + "╝")
+        print()
+        print("🎉 ¡Tu thumbnail está listo para usar!")
+        
+    except Exception as e:
+        print(f"\n❌ ERROR DURANTE LA GENERACIÓN:")
+        print(f"   {str(e)}")
         raise
 
 

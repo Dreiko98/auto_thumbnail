@@ -76,7 +76,7 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    """Maneja la subida de archivos (imagen de fondo e iconos)."""
+    """Maneja la subida de archivos (imagen de fondo, iconos y foto de persona)."""
     try:
         response = {'success': False, 'message': '', 'files': {'icons': []}}
         
@@ -107,10 +107,43 @@ def upload_file():
         # Siempre incluir icons en la respuesta (vacío si no hay)
         response['files']['icons'] = icons
         
+        # Procesar foto de persona (para plantilla 2)
+        if 'person_photo' in request.files:
+            file = request.files['person_photo']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                file.save(file_path)
+                response['files']['person_photo'] = unique_filename
+                print(f"✅ Foto de persona guardada: {unique_filename}")
+        
+        # Procesar icono 1 de plantilla 3
+        if 'icon1_template3' in request.files:
+            file = request.files['icon1_template3']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                file.save(file_path)
+                response['files']['icon1_template3'] = unique_filename
+                print(f"✅ Icono 1 (plantilla 3) guardado: {unique_filename}")
+        
+        # Procesar icono 2 de plantilla 3
+        if 'icon2_template3' in request.files:
+            file = request.files['icon2_template3']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                file.save(file_path)
+                response['files']['icon2_template3'] = unique_filename
+                print(f"✅ Icono 2 (plantilla 3) guardado: {unique_filename}")
+        
         response['success'] = True
         response['message'] = f"Archivos subidos correctamente. Fondo: {'✅' if 'background' in response['files'] else '❌'}, Iconos: {len(icons)}"
         
-        print(f"📤 Respuesta /upload: success={response['success']}, background={'✅' if 'background' in response['files'] else '❌'}, icons={len(icons)}")
+        print(f"📤 Respuesta /upload: success={response['success']}, background={'✅' if 'background' in response['files'] else '❌'}, icons={len(icons)}, person_photo={'✅' if 'person_photo' in response['files'] else '❌'}, icon1_t3={'✅' if 'icon1_template3' in response['files'] else '❌'}, icon2_t3={'✅' if 'icon2_template3' in response['files'] else '❌'}")
         
         return jsonify(response)
         
@@ -123,14 +156,15 @@ def generate_thumbnail():
     try:
         data = request.get_json()
         
-        # Validar datos requeridos
-        if not data.get('title'):
-            return jsonify({'success': False, 'message': 'El título es obligatorio'})
+        # Obtener tipo de plantilla (por defecto: plantilla 1)
+        template_type = data.get('template_type', 1)
+        print(f"🎨 Tipo de plantilla seleccionada: {template_type}")
         
+        # Validar imagen de fondo (común para todas las plantillas)
         if not data.get('background_file'):
             return jsonify({'success': False, 'message': 'La imagen de fondo es obligatoria'})
         
-        # Preparar rutas de archivos
+        # Preparar ruta de imagen de fondo
         background_file = data.get('background_file')
         print(f"📥 background_file recibido: {background_file}")
         background_path = os.path.join(app.config['UPLOAD_FOLDER'], background_file)
@@ -139,48 +173,122 @@ def generate_thumbnail():
         
         if not os.path.exists(background_path):
             print(f"   ❌ ARCHIVO NO ENCONTRADO!")
-            print(f"   📂 Contenido de {app.config['UPLOAD_FOLDER']}:")
-            try:
-                for f in os.listdir(app.config['UPLOAD_FOLDER']):
-                    print(f"      - {f}")
-            except Exception as e:
-                print(f"      Error listando: {e}")
             return jsonify({'success': False, 'message': 'Imagen de fondo no encontrada'})
-        
-        # Preparar iconos
-        icon_paths = []
-        icon_files = data.get('icon_files', [])
-        print(f"📥 icon_files recibido: {icon_files} (type: {type(icon_files)})")
-        
-        if icon_files and isinstance(icon_files, list) and len(icon_files) > 0:
-            for icon_file in icon_files:
-                icon_path = os.path.join(app.config['UPLOAD_FOLDER'], icon_file)
-                print(f"   🔍 Verificando icono: {icon_path}")
-                if os.path.exists(icon_path):
-                    icon_paths.append(icon_path)
-                    print(f"   ✅ Icono encontrado: {icon_file}")
-                else:
-                    print(f"   ❌ Icono NO encontrado: {icon_file}")
-        
-        print(f"📤 Iconos a procesar: {len(icon_paths)}")
         
         # Generar nombre único para el resultado
         result_id = uuid.uuid4().hex
         result_name = f"thumbnail_{result_id}"
         result_path = os.path.join(app.config['RESULTS_FOLDER'], result_name)
         
-        # Generar thumbnail usando la función existente
-        print(f"🎨 Generando thumbnail:")
-        print(f"   📸 Fondo: {background_path}")
-        print(f"   📝 Título: {data['title']}")
-        print(f"   🎯 Iconos: {len(icon_paths)}")
-        
-        generar_thumbnail(
-            imagen_base=background_path,
-            titulo=data['title'],
-            iconos=icon_paths,
-            ruta_salida=result_path
-        )
+        # Procesar según el tipo de plantilla
+        if template_type == 1:
+            # Plantilla 1: Título + Iconos
+            if not data.get('title'):
+                return jsonify({'success': False, 'message': 'El título es obligatorio'})
+            
+            # Preparar iconos
+            icon_paths = []
+            icon_files = data.get('icon_files', [])
+            print(f"📥 icon_files recibido: {icon_files}")
+            
+            if icon_files and isinstance(icon_files, list) and len(icon_files) > 0:
+                for icon_file in icon_files:
+                    icon_path = os.path.join(app.config['UPLOAD_FOLDER'], icon_file)
+                    if os.path.exists(icon_path):
+                        icon_paths.append(icon_path)
+                        print(f"   ✅ Icono encontrado: {icon_file}")
+            
+            print(f"🎨 Generando thumbnail plantilla 1:")
+            print(f"   📸 Fondo: {background_path}")
+            print(f"   📝 Título: {data['title']}")
+            print(f"   🎯 Iconos: {len(icon_paths)}")
+            
+            generar_thumbnail(
+                imagen_base=background_path,
+                titulo=data['title'],
+                iconos=icon_paths,
+                ruta_salida=result_path,
+                tipo_plantilla=template_type
+            )
+            
+        elif template_type == 2:
+            # Plantilla 2: Texto1 + Texto2 + Foto de persona
+            if not data.get('text1') or not data.get('text2'):
+                return jsonify({'success': False, 'message': 'Los textos 1 y 2 son obligatorios'})
+            
+            if not data.get('person_photo_file'):
+                return jsonify({'success': False, 'message': 'La foto de persona es obligatoria'})
+            
+            # Preparar ruta de foto de persona
+            person_photo_file = data.get('person_photo_file')
+            person_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], person_photo_file)
+            
+            if not os.path.exists(person_photo_path):
+                return jsonify({'success': False, 'message': 'Foto de persona no encontrada'})
+            
+            print(f"🎨 Generando thumbnail plantilla 2:")
+            print(f"   📸 Fondo: {background_path}")
+            print(f"   📝 Texto 1: {data['text1']}")
+            print(f"   📝 Texto 2: {data['text2']}")
+            print(f"   � Foto: {person_photo_path}")
+            
+            generar_thumbnail(
+                imagen_base=background_path,
+                titulo="",  # No se usa en plantilla 2
+                iconos=[],  # No se usa en plantilla 2
+                ruta_salida=result_path,
+                tipo_plantilla=template_type,
+                texto1=data['text1'],
+                texto2=data['text2'],
+                foto_persona=person_photo_path
+            )
+            
+        elif template_type == 3:
+            # Plantilla 3: Texto + 2 iconos en esquinas
+            if not data.get('text'):
+                return jsonify({'success': False, 'message': 'El texto es obligatorio'})
+            
+            if not data.get('icon1_file') or not data.get('icon2_file'):
+                return jsonify({'success': False, 'message': 'Los 2 iconos son obligatorios'})
+            
+            # Preparar rutas de iconos
+            icon1_file = data.get('icon1_file')
+            icon1_path = os.path.join(app.config['UPLOAD_FOLDER'], icon1_file)
+            
+            icon2_file = data.get('icon2_file')
+            icon2_path = os.path.join(app.config['UPLOAD_FOLDER'], icon2_file)
+            
+            if not os.path.exists(icon1_path):
+                return jsonify({'success': False, 'message': 'Icono 1 no encontrado'})
+            
+            if not os.path.exists(icon2_path):
+                return jsonify({'success': False, 'message': 'Icono 2 no encontrado'})
+            
+            # Obtener formato (Instagram o normal)
+            is_instagram = data.get('is_instagram', False)
+            
+            print(f"🎨 Generando thumbnail plantilla 3:")
+            print(f"   📸 Fondo: {background_path}")
+            print(f"   📝 Texto: {data['text']}")
+            print(f"   🎯 Icono 1: {icon1_path}")
+            print(f"   🎯 Icono 2: {icon2_path}")
+            if is_instagram:
+                print(f"   📱 Formato: Instagram Post (1080x1080)")
+            
+            generar_thumbnail(
+                imagen_base=background_path,
+                titulo="",  # No se usa en plantilla 3
+                iconos=[],  # No se usa en plantilla 3
+                ruta_salida=result_path,
+                tipo_plantilla=template_type,
+                texto_plantilla3=data['text'],
+                icono1_plantilla3=icon1_path,
+                icono2_plantilla3=icon2_path,
+                is_instagram_plantilla3=is_instagram
+            )
+            
+        else:
+            return jsonify({'success': False, 'message': f'Tipo de plantilla no soportado: {template_type}'})
         
         # Verificar que se generó correctamente
         png_path = f"{result_path}.png"
@@ -201,6 +309,8 @@ def generate_thumbnail():
             
     except Exception as e:
         print(f"❌ Error generando thumbnail: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': f'Error interno: {str(e)}'})
 
 @app.route('/download/<result_id>')

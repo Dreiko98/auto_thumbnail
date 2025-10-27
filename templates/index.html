@@ -265,6 +265,24 @@
             box-shadow: var(--shadow-lg);
         }
 
+        .btn-instagram {
+            background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
+            color: white;
+        }
+
+        .btn-instagram:hover {
+            background: linear-gradient(135deg, #6B2E94 0%, #DC1919 50%, #D76530 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(253, 29, 29, 0.3);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
         .btn-block {
             width: 100%;
         }
@@ -393,6 +411,55 @@
                 padding: 20px;
             }
         }
+
+        /* Estilos para las tarjetas de plantillas */
+        .template-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .template-preview {
+            margin-bottom: 10px;
+        }
+
+        .template-preview-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover .template-preview-image {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        }
+
+        .template-preview h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .template-preview p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -401,6 +468,7 @@
         <div class="banner fade-in">
             Este servicio forma parte de <a href="https://germanmallo.com" target="_blank" style="color:#fff;text-decoration:underline;font-weight:700;">germanmallo.com</a>
         </div>
+        
         <!-- Header -->
         <div class="header fade-in">
             <div class="branding">
@@ -416,14 +484,70 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
+        <!-- Vista de Selección de Plantillas -->
+        <div id="templateSelectionView" class="fade-in">
+            <div class="panel" style="margin-bottom: 30px;">
+                <h2>🎨 Selecciona una Plantilla</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 30px;">Elige el estilo de thumbnail que deseas crear</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <!-- Plantilla 1 -->
+                    <div class="template-card" onclick="selectTemplate(1)">
+                        <div class="template-preview">
+                            <img src="/static/template1_preview.png" alt="Vista previa Plantilla 1" class="template-preview-image">
+                            <h3>Plantilla 1</h3>
+                            <p>Imagen de fondo con desenfoque, título centrado e iconos en fila</p>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                            Usar esta plantilla
+                        </button>
+                    </div>
+                    
+                    <!-- Plantilla 2 -->
+                    <div class="template-card" onclick="selectTemplate(2)">
+                        <div class="template-preview">
+                            <img src="/static/template2_preview.png" alt="Vista previa Plantilla 2" class="template-preview-image">
+                            <h3>Plantilla 2</h3>
+                            <p>Dos textos laterales, foto de persona centrada con sombra</p>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                            Usar esta plantilla
+                        </button>
+                    </div>
+                    
+                    <!-- Plantilla 3 -->
+                    <div class="template-card" onclick="selectTemplate(3)">
+                        <div class="template-preview">
+                            <img src="/static/template3_preview.png" alt="Vista previa Plantilla 3" class="template-preview-image">
+                            <h3>Plantilla 3</h3>
+                            <p>Fondo nítido, texto superior discreto, iconos en esquinas</p>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                            Usar esta plantilla
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista de Creación de Thumbnail (inicialmente oculta) -->
+        <div id="thumbnailCreationView" style="display: none;">
+            <!-- Botón para volver al menú -->
+            <div style="margin-bottom: 20px;">
+                <button onclick="backToTemplateSelection()" class="btn" style="background: var(--bg-card); color: var(--text-primary);">
+                    ← Volver a selección de plantillas
+                </button>
+                <span id="selectedTemplateInfo" style="margin-left: 15px; color: var(--text-secondary); font-weight: 600;"></span>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
             <!-- Form Panel -->
             <div class="panel fade-in">
                 <h2>📝 Configuración</h2>
                 
                 <form id="thumbnailForm">
-                    <!-- Background Image -->
+                    <!-- Background Image - Común para todas las plantillas -->
                     <div class="form-group">
                         <label for="background_image">📸 Imagen de Fondo *</label>
                         <div class="file-upload">
@@ -435,24 +559,93 @@
                         <div id="background_info" class="file-info" style="display: none;"></div>
                     </div>
 
-                    <!-- Title -->
-                    <div class="form-group">
-                        <label for="title">📝 Título del Thumbnail *</label>
-                        <input type="text" id="title" class="form-control" placeholder="Ej: Tutorial de Python Avanzado" required maxlength="100">
-                        <small style="color: var(--text-secondary); font-size: 0.8rem;">Máximo 100 caracteres</small>
+                    <!-- Campos específicos para PLANTILLA 1 -->
+                    <div id="template1_fields" style="display: none;">
+                        <!-- Title -->
+                        <div class="form-group">
+                            <label for="title">📝 Título del Thumbnail *</label>
+                            <input type="text" id="title" class="form-control" placeholder="Ej: Tutorial de Python Avanzado" maxlength="100">
+                            <small style="color: var(--text-secondary); font-size: 0.8rem;">Máximo 100 caracteres</small>
+                        </div>
+
+                        <!-- Icons -->
+                        <div class="form-group">
+                            <label for="icons">🎯 Iconos (Opcional)</label>
+                            <div class="file-upload">
+                                <input type="file" id="icons" class="file-upload-input" accept="image/*" multiple>
+                                <label for="icons" class="file-upload-label">
+                                    <span>🖼️ Selecciona hasta 4 iconos</span>
+                                </label>
+                            </div>
+                            <div id="icons_info" class="file-info" style="display: none;"></div>
+                            <div id="icons_preview" class="icons-container"></div>
+                        </div>
                     </div>
 
-                    <!-- Icons -->
-                    <div class="form-group">
-                        <label for="icons">🎯 Iconos (Opcional)</label>
-                        <div class="file-upload">
-                            <input type="file" id="icons" class="file-upload-input" accept="image/*" multiple>
-                            <label for="icons" class="file-upload-label">
-                                <span>🖼️ Selecciona hasta 4 iconos</span>
-                            </label>
+                    <!-- Campos específicos para PLANTILLA 2 -->
+                    <div id="template2_fields" style="display: none;">
+                        <!-- Texto 1 -->
+                        <div class="form-group">
+                            <label for="text1">📝 Texto 1 (Izquierda) *</label>
+                            <input type="text" id="text1" class="form-control" placeholder="Ej: AQUÍ" maxlength="50">
+                            <small style="color: var(--text-secondary); font-size: 0.8rem;">Aparecerá en la parte izquierda superior</small>
                         </div>
-                        <div id="icons_info" class="file-info" style="display: none;"></div>
-                        <div id="icons_preview" class="icons-container"></div>
+
+                        <!-- Texto 2 -->
+                        <div class="form-group">
+                            <label for="text2">📝 Texto 2 (Derecha) *</label>
+                            <input type="text" id="text2" class="form-control" placeholder="Ej: TEXTO 2" maxlength="50">
+                            <small style="color: var(--text-secondary); font-size: 0.8rem;">Aparecerá en la parte derecha superior</small>
+                        </div>
+
+                        <!-- Foto de Persona -->
+                        <div class="form-group">
+                            <label for="person_photo">👤 Foto de Persona (PNG) *</label>
+                            <div class="file-upload">
+                                <input type="file" id="person_photo" class="file-upload-input" accept="image/png,image/*">
+                                <label for="person_photo" class="file-upload-label">
+                                    <span>🖼️ Selecciona una foto PNG (preferiblemente con fondo transparente)</span>
+                                </label>
+                            </div>
+                            <div id="person_photo_info" class="file-info" style="display: none;"></div>
+                            <div id="person_photo_preview" class="icons-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Campos específicos para PLANTILLA 3 -->
+                    <div id="template3_fields" style="display: none;">
+                        <!-- Texto -->
+                        <div class="form-group">
+                            <label for="text_template3">📝 Texto *</label>
+                            <input type="text" id="text_template3" class="form-control" placeholder="Ej: TEXTO" maxlength="100">
+                            <small style="color: var(--text-secondary); font-size: 0.8rem;">Aparecerá centrado en la parte superior</small>
+                        </div>
+
+                        <!-- Icono 1 - Esquina inferior izquierda -->
+                        <div class="form-group">
+                            <label for="icon1_template3">🎯 Icono 1 (Esquina inferior izquierda) *</label>
+                            <div class="file-upload">
+                                <input type="file" id="icon1_template3" class="file-upload-input" accept="image/*">
+                                <label for="icon1_template3" class="file-upload-label">
+                                    <span>🖼️ Selecciona el icono para la esquina izquierda</span>
+                                </label>
+                            </div>
+                            <div id="icon1_template3_info" class="file-info" style="display: none;"></div>
+                            <div id="icon1_template3_preview" class="icons-container"></div>
+                        </div>
+
+                        <!-- Icono 2 - Esquina inferior derecha -->
+                        <div class="form-group">
+                            <label for="icon2_template3">🎯 Icono 2 (Esquina inferior derecha) *</label>
+                            <div class="file-upload">
+                                <input type="file" id="icon2_template3" class="file-upload-input" accept="image/*">
+                                <label for="icon2_template3" class="file-upload-label">
+                                    <span>🖼️ Selecciona el icono para la esquina derecha</span>
+                                </label>
+                            </div>
+                            <div id="icon2_template3_info" class="file-info" style="display: none;"></div>
+                            <div id="icon2_template3_preview" class="icons-container"></div>
+                        </div>
                     </div>
 
                     <!-- Progress Bar -->
@@ -460,11 +653,23 @@
                         <div id="progress_bar" class="progress-bar"></div>
                     </div>
 
-                    <!-- Generate Button -->
-                    <button type="submit" id="generateBtn" class="btn btn-primary btn-block">
-                        <span id="btnText">🚀 Generar Thumbnail</span>
-                        <span id="btnLoading" class="loading" style="display: none;"></span>
-                    </button>
+                    <!-- Generate Buttons - Botón único para plantillas 1 y 2 -->
+                    <div id="singleButtonContainer">
+                        <button type="submit" id="generateBtn" class="btn btn-primary btn-block">
+                            <span id="btnText">🚀 Generar Thumbnail</span>
+                            <span id="btnLoading" class="loading" style="display: none;"></span>
+                        </button>
+                    </div>
+
+                    <!-- Generate Buttons - Dos botones para plantilla 3 -->
+                    <div id="dualButtonContainer" class="btn-group" style="display: none;">
+                        <button type="button" id="generateThumbnailBtn" class="btn btn-primary">
+                            <span>🚀 Generar Thumbnail</span>
+                        </button>
+                        <button type="button" id="generateIgPostBtn" class="btn btn-instagram">
+                            <span>📸 Generar IG Post</span>
+                        </button>
+                    </div>
                 </form>
 
                 <!-- Alerts -->
@@ -491,6 +696,7 @@
                 </div>
             </div>
         </div>
+        </div>
 
         <!-- Footer -->
         <div class="footer">
@@ -503,8 +709,13 @@
         // Variables globales
         let uploadedFiles = {
             background: null,
-            icons: []
+            icons: [],
+            person_photo: null,  // Para plantilla 2
+            icon1_template3: null,  // Para plantilla 3
+            icon2_template3: null   // Para plantilla 3
         };
+        
+        let selectedTemplate = null; // Nueva variable para almacenar la plantilla seleccionada
 
         // Referencias DOM
         const form = document.getElementById('thumbnailForm');
@@ -522,6 +733,116 @@
         const downloadBtn = document.getElementById('download_btn');
         const progressContainer = document.getElementById('progress_container');
         const progressBar = document.getElementById('progress_bar');
+        
+        // Referencias DOM para campos de plantilla 2
+        const personPhotoInput = document.getElementById('person_photo');
+        const personPhotoInfo = document.getElementById('person_photo_info');
+        const personPhotoPreview = document.getElementById('person_photo_preview');
+        
+        // Referencias DOM para campos de plantilla 3
+        const icon1Template3Input = document.getElementById('icon1_template3');
+        const icon1Template3Info = document.getElementById('icon1_template3_info');
+        const icon1Template3Preview = document.getElementById('icon1_template3_preview');
+        const icon2Template3Input = document.getElementById('icon2_template3');
+        const icon2Template3Info = document.getElementById('icon2_template3_info');
+        const icon2Template3Preview = document.getElementById('icon2_template3_preview');
+        
+        // Referencias a las vistas
+        const templateSelectionView = document.getElementById('templateSelectionView');
+        const thumbnailCreationView = document.getElementById('thumbnailCreationView');
+        const selectedTemplateInfo = document.getElementById('selectedTemplateInfo');
+
+        // Funciones de navegación
+        function selectTemplate(templateNumber) {
+            selectedTemplate = templateNumber;
+            
+            // Ocultar vista de selección y mostrar vista de creación
+            templateSelectionView.style.display = 'none';
+            thumbnailCreationView.style.display = 'block';
+            
+            // Actualizar información de plantilla seleccionada
+            selectedTemplateInfo.textContent = `📋 Plantilla ${templateNumber} seleccionada`;
+            
+            // Mostrar/ocultar campos según la plantilla
+            const template1Fields = document.getElementById('template1_fields');
+            const template2Fields = document.getElementById('template2_fields');
+            const template3Fields = document.getElementById('template3_fields');
+            const singleButtonContainer = document.getElementById('singleButtonContainer');
+            const dualButtonContainer = document.getElementById('dualButtonContainer');
+            
+            if (templateNumber === 1) {
+                template1Fields.style.display = 'block';
+                template2Fields.style.display = 'none';
+                template3Fields.style.display = 'none';
+                singleButtonContainer.style.display = 'block';
+                dualButtonContainer.style.display = 'none';
+            } else if (templateNumber === 2) {
+                template1Fields.style.display = 'none';
+                template2Fields.style.display = 'block';
+                template3Fields.style.display = 'none';
+                singleButtonContainer.style.display = 'block';
+                dualButtonContainer.style.display = 'none';
+            } else if (templateNumber === 3) {
+                template1Fields.style.display = 'none';
+                template2Fields.style.display = 'none';
+                template3Fields.style.display = 'block';
+                singleButtonContainer.style.display = 'none';
+                dualButtonContainer.style.display = 'grid';
+            }
+            
+            // Resetear formulario
+            resetForm();
+            
+            console.log('✅ Plantilla seleccionada:', templateNumber);
+        }
+
+        function backToTemplateSelection() {
+            // Volver a la vista de selección
+            thumbnailCreationView.style.display = 'none';
+            templateSelectionView.style.display = 'block';
+            
+            // Resetear selección
+            selectedTemplate = null;
+            
+            // Limpiar formulario y preview
+            resetForm();
+            clearAlerts();
+        }
+
+        function resetForm() {
+            if (form) {
+                form.reset();
+            }
+            uploadedFiles = {
+                background: null,
+                icons: [],
+                person_photo: null,
+                icon1_template3: null,
+                icon2_template3: null
+            };
+            
+            if (backgroundInfo) backgroundInfo.style.display = 'none';
+            if (iconsInfo) iconsInfo.style.display = 'none';
+            if (iconsPreview) iconsPreview.innerHTML = '';
+            if (personPhotoInfo) personPhotoInfo.style.display = 'none';
+            if (personPhotoPreview) personPhotoPreview.innerHTML = '';
+            if (icon1Template3Info) icon1Template3Info.style.display = 'none';
+            if (icon1Template3Preview) icon1Template3Preview.innerHTML = '';
+            if (icon2Template3Info) icon2Template3Info.style.display = 'none';
+            if (icon2Template3Preview) icon2Template3Preview.innerHTML = '';
+            if (downloadSection) downloadSection.style.display = 'none';
+            
+            // Resetear preview
+            if (previewContainer) {
+                previewContainer.innerHTML = `
+                    <div class="preview-placeholder">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🖼️</div>
+                        <p>Tu thumbnail aparecerá aquí</p>
+                        <small style="color: var(--text-secondary);">Completa el formulario y haz clic en "Generar Thumbnail"</small>
+                    </div>
+                `;
+            }
+        }
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
@@ -539,6 +860,27 @@
             iconsInput.addEventListener('change', function(e) {
                 handleIconsUpload(Array.from(e.target.files));
             });
+
+            // Person photo upload (para plantilla 2)
+            if (personPhotoInput) {
+                personPhotoInput.addEventListener('change', function(e) {
+                    handlePersonPhotoUpload(e.target.files[0]);
+                });
+            }
+
+            // Icon 1 upload (para plantilla 3)
+            if (icon1Template3Input) {
+                icon1Template3Input.addEventListener('change', function(e) {
+                    handleIcon1Template3Upload(e.target.files[0]);
+                });
+            }
+
+            // Icon 2 upload (para plantilla 3)
+            if (icon2Template3Input) {
+                icon2Template3Input.addEventListener('change', function(e) {
+                    handleIcon2Template3Upload(e.target.files[0]);
+                });
+            }
 
             // Drag and drop functionality
             setupDragAndDrop();
@@ -667,6 +1009,143 @@
             }
         }
 
+        async function handlePersonPhotoUpload(file) {
+            if (!file) return;
+
+            if (!isValidImageFile(file)) {
+                showAlert('Formato de imagen no válido. Usa PNG, JPG, WEBP, etc.', 'error');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('person_photo', file);
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.files.person_photo) {
+                    uploadedFiles.person_photo = result.files.person_photo;
+                    personPhotoInfo.textContent = `✅ ${file.name} (${formatFileSize(file.size)})`;
+                    personPhotoInfo.className = 'file-info success';
+                    personPhotoInfo.style.display = 'block';
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        personPhotoPreview.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'icon-preview';
+                        img.style.height = '120px';
+                        img.style.width = 'auto';
+                        img.alt = file.name;
+                        personPhotoPreview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                    
+                } else {
+                    showAlert(result.message || 'Error al subir la foto', 'error');
+                }
+            } catch (error) {
+                showAlert('Error al subir la foto: ' + error.message, 'error');
+            }
+        }
+
+        async function handleIcon1Template3Upload(file) {
+            if (!file) return;
+
+            if (!isValidImageFile(file)) {
+                showAlert('Formato de imagen no válido. Usa PNG, JPG, WEBP, etc.', 'error');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('icon1_template3', file);
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.files.icon1_template3) {
+                    uploadedFiles.icon1_template3 = result.files.icon1_template3;
+                    icon1Template3Info.textContent = `✅ ${file.name} (${formatFileSize(file.size)})`;
+                    icon1Template3Info.className = 'file-info success';
+                    icon1Template3Info.style.display = 'block';
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        icon1Template3Preview.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'icon-preview';
+                        img.alt = file.name;
+                        icon1Template3Preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                    
+                } else {
+                    showAlert(result.message || 'Error al subir el icono 1', 'error');
+                }
+            } catch (error) {
+                showAlert('Error al subir el icono 1: ' + error.message, 'error');
+            }
+        }
+
+        async function handleIcon2Template3Upload(file) {
+            if (!file) return;
+
+            if (!isValidImageFile(file)) {
+                showAlert('Formato de imagen no válido. Usa PNG, JPG, WEBP, etc.', 'error');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('icon2_template3', file);
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.files.icon2_template3) {
+                    uploadedFiles.icon2_template3 = result.files.icon2_template3;
+                    icon2Template3Info.textContent = `✅ ${file.name} (${formatFileSize(file.size)})`;
+                    icon2Template3Info.className = 'file-info success';
+                    icon2Template3Info.style.display = 'block';
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        icon2Template3Preview.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'icon-preview';
+                        img.alt = file.name;
+                        icon2Template3Preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                    
+                } else {
+                    showAlert(result.message || 'Error al subir el icono 2', 'error');
+                }
+            } catch (error) {
+                showAlert('Error al subir el icono 2: ' + error.message, 'error');
+            }
+        }
+
         function showIconPreviews(files) {
             iconsPreview.innerHTML = '';
             
@@ -698,35 +1177,102 @@
                 
                 await generateThumbnail();
             });
+
+            // Event listeners para los botones de plantilla 3
+            const generateThumbnailBtn = document.getElementById('generateThumbnailBtn');
+            const generateIgPostBtn = document.getElementById('generateIgPostBtn');
+
+            if (generateThumbnailBtn) {
+                generateThumbnailBtn.addEventListener('click', async function() {
+                    if (!validateForm()) return;
+                    await generateThumbnail(false); // Thumbnail normal
+                });
+            }
+
+            if (generateIgPostBtn) {
+                generateIgPostBtn.addEventListener('click', async function() {
+                    if (!validateForm()) return;
+                    await generateThumbnail(true); // Instagram post (4:3)
+                });
+            }
         }
 
         function validateForm() {
-            const title = document.getElementById('title').value.trim();
-            
-            if (!title) {
-                showAlert('El título es obligatorio', 'error');
-                return false;
-            }
-            
+            // Validar imagen de fondo (común para todas las plantillas)
             if (!uploadedFiles.background) {
                 showAlert('Selecciona una imagen de fondo', 'error');
                 return false;
             }
             
+            // Validaciones específicas según plantilla
+            if (selectedTemplate === 1) {
+                const title = document.getElementById('title').value.trim();
+                if (!title) {
+                    showAlert('El título es obligatorio', 'error');
+                    return false;
+                }
+            } else if (selectedTemplate === 2) {
+                const text1 = document.getElementById('text1').value.trim();
+                const text2 = document.getElementById('text2').value.trim();
+                
+                if (!text1) {
+                    showAlert('El Texto 1 es obligatorio', 'error');
+                    return false;
+                }
+                if (!text2) {
+                    showAlert('El Texto 2 es obligatorio', 'error');
+                    return false;
+                }
+                if (!uploadedFiles.person_photo) {
+                    showAlert('Selecciona una foto de persona', 'error');
+                    return false;
+                }
+            } else if (selectedTemplate === 3) {
+                const text = document.getElementById('text_template3').value.trim();
+                
+                if (!text) {
+                    showAlert('El texto es obligatorio', 'error');
+                    return false;
+                }
+                if (!uploadedFiles.icon1_template3) {
+                    showAlert('Selecciona el icono 1 (esquina inferior izquierda)', 'error');
+                    return false;
+                }
+                if (!uploadedFiles.icon2_template3) {
+                    showAlert('Selecciona el icono 2 (esquina inferior derecha)', 'error');
+                    return false;
+                }
+            }
+            
             return true;
         }
 
-        async function generateThumbnail() {
+        async function generateThumbnail(isInstagram = false) {
             setLoading(true);
             clearAlerts();
             showProgress(0);
 
             try {
+                // Construir datos según la plantilla seleccionada
                 const data = {
-                    title: document.getElementById('title').value.trim(),
                     background_file: uploadedFiles.background,
-                    icon_files: uploadedFiles.icons
+                    template_type: selectedTemplate,
+                    is_instagram: isInstagram  // Nuevo parámetro para formato Instagram
                 };
+
+                // Añadir campos específicos de cada plantilla
+                if (selectedTemplate === 1) {
+                    data.title = document.getElementById('title').value.trim();
+                    data.icon_files = uploadedFiles.icons;
+                } else if (selectedTemplate === 2) {
+                    data.text1 = document.getElementById('text1').value.trim();
+                    data.text2 = document.getElementById('text2').value.trim();
+                    data.person_photo_file = uploadedFiles.person_photo;
+                } else if (selectedTemplate === 3) {
+                    data.text = document.getElementById('text_template3').value.trim();
+                    data.icon1_file = uploadedFiles.icon1_template3;
+                    data.icon2_file = uploadedFiles.icon2_template3;
+                }
 
                 showProgress(25);
 
