@@ -16,15 +16,18 @@ import base64
 import tempfile
 import uuid
 from io import BytesIO
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 from werkzeug.utils import secure_filename
 from generate_thumbnail import generar_thumbnail
+from database import init_database, create_user, authenticate_user, get_user_by_id, update_openai_token, get_openai_token
+from ai_generator import generate_background_image, generate_icon_image, test_openai_token, save_generated_image
 import webbrowser
 import threading
 import time
+from functools import wraps
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'thumbnail_generator_2025'
+app.config['SECRET_KEY'] = 'thumbnail_generator_2025_secure_key_change_in_production'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB máximo
 
 # Directorio temporal para archivos subidos - usar carpetas del proyecto, no /tmp
@@ -42,8 +45,20 @@ app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 print(f"📁 Carpeta de uploads: {UPLOAD_FOLDER}")
 print(f"📁 Carpeta de resultados: {RESULTS_FOLDER}")
 
+# Inicializar base de datos
+init_database()
+
 # Extensiones permitidas
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'}
+
+def login_required(f):
+    """Decorador para rutas que requieren autenticación."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'message': 'Debes iniciar sesión', 'redirect': '/login'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 def allowed_file(filename):
     """Verifica si el archivo tiene una extensión permitida."""
@@ -334,6 +349,258 @@ def download_thumbnail(result_id):
 def health_check():
     """Endpoint para verificar el estado de la aplicación."""
     return jsonify({'status': 'ok', 'message': 'Thumbnail Generator Web App funcionando correctamente'})
+
+
+# ==========================================
+# RUTAS DE AUTENTICACIÓN
+# ==========================================
+
+@app.route('/register', methods=['POST'])
+def register():
+    """Registro de nuevos usuarios."""
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+        
+        # Validaciones
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Usuario y contraseña son obligatorios'})
+        
+        if len(username) < 3:
+            return jsonify({'success': False, 'message': 'El usuario debe tener al menos 3 caracteres'})
+        
+        if len(password) < 6:
+            return jsonify({'success': False, 'message': 'La contraseña debe tener al menos 6 caracteres'})
+        
+        # Crear usuario
+        user = create_user(username, password)
+        
+        if user:
+            # Iniciar sesión automáticamente
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            
+            return jsonify({
+                'success': True,
+                'message': f'¡Bienvenido {username}! Tu cuenta ha sido creada exitosamente',
+                'user': {
+                    'id': user['id'],
+                    'username': user['username']
+                }
+            })
+        else:
+            return jsonify({'success': False, 'message': 'El nombre de usuario ya está en uso'})
+            
+    except Exception as e:
+        print(f"❌ Error en registro: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al crear usuario'})
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    """Inicio de sesión de usuarios."""
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+        
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Usuario y contraseña son obligatorios'})
+        
+        # Autenticar usuario
+        user = authenticate_user(username, password)
+        
+        if user:
+            # Crear sesión
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            session['has_openai_token'] = user['has_openai_token']
+            
+            return jsonify({
+                'success': True,
+                'message': f'¡Bienvenido de nuevo, {username}!',
+                'user': {
+                    'id': user['id'],
+                    'username': user['username'],
+                    'has_openai_token': user['has_openai_token']
+                }
+            })
+        else:
+            return jsonify({'success': False, 'message': 'Usuario o contraseña incorrectos'})
+            
+    except Exception as e:
+        print(f"❌ Error en login: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al iniciar sesión'})
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    """Cierre de sesión."""
+    session.clear()
+    return jsonify({'success': True, 'message': 'Sesión cerrada exitosamente'})
+
+
+@app.route('/session', methods=['GET'])
+def get_session():
+    """Obtiene información de la sesión actual."""
+    if 'user_id' in session:
+        user = get_user_by_id(session['user_id'])
+        if user:
+            return jsonify({
+                'logged_in': True,
+                'user': {
+                    'id': user['id'],
+                    'username': user['username'],
+                    'has_openai_token': user['has_openai_token']
+                }
+            })
+    
+    return jsonify({'logged_in': False})
+
+
+@app.route('/update_token', methods=['POST'])
+@login_required
+def update_token():
+    """Actualiza el token de OpenAI del usuario."""
+    try:
+        data = request.get_json()
+        openai_token = data.get('openai_token', '').strip()
+        
+        if not openai_token:
+            # Eliminar token si está vacío
+            openai_token = None
+        
+        user_id = session['user_id']
+        
+        if update_openai_token(user_id, openai_token):
+            session['has_openai_token'] = openai_token is not None
+            
+            message = 'Token de OpenAI actualizado' if openai_token else 'Token de OpenAI eliminado'
+            return jsonify({'success': True, 'message': message})
+        else:
+            return jsonify({'success': False, 'message': 'Error al actualizar token'})
+            
+    except Exception as e:
+        print(f"❌ Error al actualizar token: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al actualizar token'})
+
+
+# ==========================================
+# RUTAS DE GENERACIÓN CON IA
+# ==========================================
+
+@app.route('/generate_ai_background', methods=['POST'])
+@login_required
+def generate_ai_background():
+    """Genera una imagen de fondo usando IA."""
+    try:
+        data = request.get_json()
+        description = data.get('description', '').strip()
+        
+        if not description:
+            return jsonify({'success': False, 'message': 'La descripción es obligatoria'})
+        
+        # Obtener token de OpenAI del usuario
+        user_id = session['user_id']
+        api_key = get_openai_token(user_id)
+        
+        if not api_key:
+            return jsonify({
+                'success': False, 
+                'message': 'Necesitas configurar tu token de OpenAI primero',
+                'require_token': True
+            })
+        
+        print(f"\n🎨 Generando fondo con IA para usuario {session['username']}")
+        print(f"   📝 Descripción: {description}")
+        
+        # Generar imagen
+        image = generate_background_image(description, api_key)
+        
+        if image:
+            # Guardar imagen en uploads
+            filename = f"{uuid.uuid4().hex}_ai_background.png"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            if save_generated_image(image, filepath):
+                # Convertir a base64 para preview
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                
+                return jsonify({
+                    'success': True,
+                    'message': '¡Imagen de fondo generada con éxito!',
+                    'filename': filename,
+                    'preview': f'data:image/png;base64,{img_base64}'
+                })
+            else:
+                return jsonify({'success': False, 'message': 'Error al guardar la imagen generada'})
+        else:
+            return jsonify({'success': False, 'message': 'No se pudo generar la imagen. Verifica tu token de OpenAI.'})
+            
+    except Exception as e:
+        print(f"❌ Error al generar fondo con IA: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+
+
+@app.route('/generate_ai_icon', methods=['POST'])
+@login_required
+def generate_ai_icon():
+    """Genera un icono usando IA."""
+    try:
+        data = request.get_json()
+        description = data.get('description', '').strip()
+        icon_number = data.get('icon_number', 1)
+        
+        if not description:
+            return jsonify({'success': False, 'message': 'La descripción es obligatoria'})
+        
+        # Obtener token de OpenAI del usuario
+        user_id = session['user_id']
+        api_key = get_openai_token(user_id)
+        
+        if not api_key:
+            return jsonify({
+                'success': False, 
+                'message': 'Necesitas configurar tu token de OpenAI primero',
+                'require_token': True
+            })
+        
+        print(f"\n🎯 Generando icono #{icon_number} con IA para usuario {session['username']}")
+        print(f"   📝 Descripción: {description}")
+        
+        # Generar icono
+        image = generate_icon_image(description, api_key, icon_number)
+        
+        if image:
+            # Guardar imagen en uploads
+            filename = f"{uuid.uuid4().hex}_ai_icon{icon_number}.png"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            if save_generated_image(image, filepath):
+                # Convertir a base64 para preview
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'¡Icono #{icon_number} generado con éxito!',
+                    'filename': filename,
+                    'preview': f'data:image/png;base64,{img_base64}',
+                    'icon_number': icon_number
+                })
+            else:
+                return jsonify({'success': False, 'message': 'Error al guardar la imagen generada'})
+        else:
+            return jsonify({'success': False, 'message': 'No se pudo generar el icono. Verifica tu token de OpenAI.'})
+            
+    except Exception as e:
+        print(f"❌ Error al generar icono con IA: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+
 
 def open_browser():
     """Abre el navegador automáticamente tras iniciar el servidor."""
