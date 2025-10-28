@@ -28,11 +28,14 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copiar el resto del código
 COPY . .
 
-# Crear directorios para uploads y thumbnails
-RUN mkdir -p uploads thumbnails
+# Crear directorios para archivos temporales (se limpian automáticamente)
+RUN mkdir -p .uploads .results static
 
 # Exponer puerto
 EXPOSE 5000
 
+# Variable de entorno para la secret key (se puede sobrescribir en docker-compose)
+ENV FLASK_SECRET_KEY="thumbnail_generator_production_key_$(date +%s)"
+
 # Comando para ejecutar la app con Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "wsgi:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "120", "wsgi:app"]

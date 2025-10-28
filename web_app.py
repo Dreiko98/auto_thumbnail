@@ -65,7 +65,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def cleanup_old_files():
-    """Limpia archivos temporales antiguos (más de 24 horas) - NO se ejecuta en cada carga."""
+    """Limpia archivos temporales antiguos."""
     try:
         current_time = time.time()
         for folder in [UPLOAD_FOLDER, RESULTS_FOLDER]:
@@ -73,15 +73,34 @@ def cleanup_old_files():
                 for filename in os.listdir(folder):
                     file_path = os.path.join(folder, filename)
                     if os.path.isfile(file_path):
+                        # Eliminar archivos más antiguos de 1 hora
                         file_age = current_time - os.path.getctime(file_path)
-                        if file_age > 86400:  # 24 horas - más conservador
+                        if file_age > 3600:  # 1 hora
                             try:
                                 os.remove(file_path)
                                 print(f"🗑️  Archivo antiguo eliminado: {filename}")
                             except OSError as e:
                                 print(f"⚠️  No se pudo eliminar {filename}: {e}")
     except Exception as e:
-        print(f"Error limpiando archivos temporales: {e}")
+        print(f"⚠️  Error limpiando archivos temporales: {e}")
+
+
+def cleanup_all_temp_files():
+    """Limpia TODOS los archivos temporales al iniciar el servidor."""
+    try:
+        for folder in [UPLOAD_FOLDER, RESULTS_FOLDER]:
+            if os.path.exists(folder):
+                for filename in os.listdir(folder):
+                    file_path = os.path.join(folder, filename)
+                    if os.path.isfile(file_path):
+                        try:
+                            os.remove(file_path)
+                            print(f"🗑️  Archivo temporal eliminado: {filename}")
+                        except OSError as e:
+                            print(f"⚠️  No se pudo eliminar {filename}: {e}")
+        print("✅ Limpieza completa de archivos temporales al iniciar")
+    except Exception as e:
+        print(f"⚠️  Error en limpieza inicial: {e}")
 
 @app.route('/')
 def index():
@@ -312,12 +331,47 @@ def generate_thumbnail():
             with open(png_path, 'rb') as img_file:
                 img_base64 = base64.b64encode(img_file.read()).decode('utf-8')
             
+            # Limpiar archivos temporales inmediatamente
+            try:
+                # Eliminar imagen de fondo subida
+                if os.path.exists(background_path):
+                    os.remove(background_path)
+                    print(f"🗑️  Eliminado: {background_path}")
+                
+                # Eliminar iconos subidos
+                for icon_path in icon_paths:
+                    if os.path.exists(icon_path):
+                        os.remove(icon_path)
+                        print(f"🗑️  Eliminado: {icon_path}")
+                
+                # Eliminar foto de persona (plantilla 2)
+                if template_type == 2 and person_photo_path and os.path.exists(person_photo_path):
+                    os.remove(person_photo_path)
+                    print(f"🗑️  Eliminado: {person_photo_path}")
+                
+                # Eliminar iconos plantilla 3
+                if template_type == 3:
+                    if icon1_path and os.path.exists(icon1_path):
+                        os.remove(icon1_path)
+                        print(f"🗑️  Eliminado: {icon1_path}")
+                    if icon2_path and os.path.exists(icon2_path):
+                        os.remove(icon2_path)
+                        print(f"🗑️  Eliminado: {icon2_path}")
+                
+                # Eliminar thumbnail generado
+                if os.path.exists(png_path):
+                    os.remove(png_path)
+                    print(f"🗑️  Eliminado: {png_path}")
+                
+                print("✅ Limpieza automática de archivos temporales completada")
+            except Exception as cleanup_error:
+                print(f"⚠️  Error en limpieza automática: {cleanup_error}")
+            
             return jsonify({
                 'success': True,
                 'message': '🎉 Thumbnail generado exitosamente',
                 'result_id': result_id,
-                'preview': f"data:image/png;base64,{img_base64}",
-                'download_url': f"/download/{result_id}"
+                'preview': f"data:image/png;base64,{img_base64}"
             })
         else:
             return jsonify({'success': False, 'message': 'Error al generar el thumbnail'})
@@ -486,6 +540,43 @@ def update_token():
         return jsonify({'success': False, 'message': 'Error al actualizar token'})
 
 
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password_route():
+    """Cambia la contraseña del usuario."""
+    try:
+        from database import change_password
+        
+        data = request.get_json()
+        current_password = data.get('current_password', '').strip()
+        new_password = data.get('new_password', '').strip()
+        confirm_password = data.get('confirm_password', '').strip()
+        
+        # Validaciones
+        if not current_password or not new_password or not confirm_password:
+            return jsonify({'success': False, 'message': 'Todos los campos son requeridos'})
+        
+        if new_password != confirm_password:
+            return jsonify({'success': False, 'message': 'Las contraseñas nuevas no coinciden'})
+        
+        if len(new_password) < 6:
+            return jsonify({'success': False, 'message': 'La nueva contraseña debe tener al menos 6 caracteres'})
+        
+        if new_password == current_password:
+            return jsonify({'success': False, 'message': 'La nueva contraseña debe ser diferente a la actual'})
+        
+        user_id = session['user_id']
+        
+        if change_password(user_id, current_password, new_password):
+            return jsonify({'success': True, 'message': 'Contraseña actualizada correctamente'})
+        else:
+            return jsonify({'success': False, 'message': 'Contraseña actual incorrecta'})
+            
+    except Exception as e:
+        print(f"❌ Error al cambiar contraseña: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al cambiar contraseña'})
+
+
 # ==========================================
 # RUTAS DE GENERACIÓN CON IA
 # ==========================================
@@ -615,6 +706,10 @@ def run_app(debug=False, port=5000):
     print("🔧 Presiona Ctrl+C para detener el servidor")
     print("═" * 60)
     
+    # Limpiar archivos temporales al iniciar
+    print("\n🧹 Limpiando archivos temporales...")
+    cleanup_all_temp_files()
+    
     # Abrir navegador automáticamente en modo producción
     if not debug:
         threading.Thread(target=open_browser, daemon=True).start()
@@ -629,7 +724,8 @@ def run_app(debug=False, port=5000):
     except KeyboardInterrupt:
         print("\n👋 Cerrando aplicación...")
     finally:
-        cleanup_old_files()
+        print("\n🧹 Limpieza final de archivos temporales...")
+        cleanup_all_temp_files()
 
 if __name__ == '__main__':
     import sys

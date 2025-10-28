@@ -1,52 +1,85 @@
-# 🎨 Generador Automát### 🐳 **Despliegue con Docker (Recomendado)**
-```bash
-# Copiar al servidor
-./deploy_to_server_docker.sh
+# 🎨 Thumbnail Generator · Germán Mallo
 
-# En el servidor
-ssh germanmallo@100.87.242.53
+Generador profesional de thumbnails de 1920×1080px con sistema de autenticación, integración con IA (DALL-E 3) y despliegue en Docker.
+
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Flask](https://img.shields.io/badge/flask-2.3+-green)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## ✨ Características Principales
+
+### 🎨 Generación de Thumbnails
+- ✅ **3 plantillas profesionales** con diseños modernos
+- ✅ Imagen de fondo con desenfoque inteligente
+- ✅ Texto personalizable con fuentes modernas
+- ✅ Iconos y elementos decorativos
+- ✅ Preview en tiempo real
+
+### 🤖 Integración con IA
+- ✅ **Generación automática** con DALL-E 3
+- ✅ **Fondos optimizados** para thumbnails (1920×1080)
+- ✅ **Iconos transparentes** (PNG con alpha channel)
+- ✅ **Exportación de prompts** (sin costo de API)
+- ✅ Cada usuario usa su propio token OpenAI
+
+### 👤 Sistema de Usuarios
+- ✅ Registro y login seguro
+- ✅ Contraseñas hasheadas (SHA-256 + salt)
+- ✅ Cambio de contraseña
+- ✅ Gestión de tokens OpenAI por usuario
+- ✅ Base de datos SQLite persistente
+
+### 🗑️ Gestión Inteligente de Archivos
+- ✅ **NO se guardan archivos permanentemente**
+- ✅ Limpieza automática después de generar
+- ✅ Solo se persiste la base de datos
+- ✅ Limpieza en startup/shutdown
+
+### 🐳 Docker Production Ready
+- ✅ Deployment con un solo comando
+- ✅ Nginx reverse proxy incluido
+- ✅ Health checks automáticos
+- ✅ Volúmenes persistentes para DB
+- ✅ Restart automático
+
+---
+
+## 🚀 Quick Start
+
+### Opción 1: Docker (Recomendado)
+
+```bash
+# 1. Clonar repositorio
+git clone <tu-repo>
 cd auto_thumbnail
-./deploy_docker.sh
-```
-**Resultado:** App ejecutándose en contenedores Docker con nginx como proxy reverso.
 
-#### 🛠️ **Gestión con Docker**
-```bash
-# Ver logs
-sudo docker-compose logs -f
+# 2. Deploy automático
+./deploy_production.sh
 
-# Reiniciar servicios
-sudo docker-compose restart
-
-# Detener todo
-sudo docker-compose down
-
-# Actualizar (después de cambios en el código)
-sudo docker-compose build --no-cache
-sudo docker-compose up -d
-```s
-
-Aplicación para generar thumbnails profesionales de 1920×1080px. Disponible como **script de Python** y **aplicación web**.
-
-## 🚀 Inicio Rápido
-
-### 🌐 **Aplicación Web (Recomendado)**
-```bash
-# Instalación automática
-./install_dependencies.sh
-
-# Ejecutar aplicación web
-./launch_app.sh
-# O manualmente: python3 web_app.py
-```
-**Abre:** `http://localhost:5000`
-
-### 💻 **Script de Línea de Comandos**
-```bash
-python3 generate_thumbnail.py
+# 3. Acceder
+# http://localhost:5000
 ```
 
-### 🖥️ **Despliegue en Servidor (Producción)**
+### Opción 2: Local (Desarrollo)
+
+```bash
+# 1. Instalar dependencias
+pip install -r requirements.txt
+
+# 2. Ejecutar aplicación
+python3 web_app.py
+
+# 3. Acceder
+# http://localhost:5000
+```
+
+---
+
+## � Requisitos
 
 Para tener la aplicación ejecutándose 24/7 en tu servidor:
 

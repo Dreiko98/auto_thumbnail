@@ -6,10 +6,18 @@ Gestiona usuarios, autenticación y tokens de OpenAI.
 import sqlite3
 import hashlib
 import secrets
+import os
 from datetime import datetime
 from contextlib import contextmanager
 
-DATABASE_PATH = 'thumbnail_users.db'
+# Usar variable de entorno para la ruta de la base de datos (útil para Docker)
+DATABASE_PATH = os.environ.get('DATABASE_PATH', 'thumbnail_users.db')
+
+# Asegurar que el directorio existe
+db_dir = os.path.dirname(DATABASE_PATH)
+if db_dir and not os.path.exists(db_dir):
+    os.makedirs(db_dir, exist_ok=True)
+    print(f"📁 Directorio de base de datos creado: {db_dir}")
 
 @contextmanager
 def get_db_connection():

@@ -5,8 +5,11 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./uploads:/app/uploads
-      - ./thumbnails:/app/thumbnails
+      # Solo persistir la base de datos de usuarios
+      - thumbnail_db:/app/db_data
+    environment:
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-thumbnail_generator_secure_key_change_me}
+      - DATABASE_PATH=/app/db_data/thumbnail_users.db
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
@@ -24,3 +27,8 @@ services:
     depends_on:
       - app
     restart: unless-stopped
+
+# Volumen persistente solo para la base de datos
+volumes:
+  thumbnail_db:
+    driver: local

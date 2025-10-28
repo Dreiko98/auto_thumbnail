@@ -87,7 +87,7 @@ def generate_background_image(user_post_description, api_key):
         PIL.Image or None: Imagen generada o None si hubo error
     """
     # Prompt template optimizado para imágenes de fondo de thumbnails
-    prompt_template = f"""Create a professional stock photo style background image in landscape orientation (16:9 ratio). 
+    prompt_template = f"""Create a professional realistic stock photo style background image in landscape orientation (16:9 ratio). 
 The image should be suitable as a YouTube thumbnail or blog post background.
 Style: Modern, clean, professional, with good contrast and visual appeal.
 Subject: {user_post_description}
@@ -128,23 +128,25 @@ def generate_icon_image(user_post_description, api_key, icon_number=1):
     Returns:
         PIL.Image or None: Imagen generada o None si hubo error
     """
-    # Prompt template optimizado para iconos
+    # Prompt template optimizado para iconos con fondo transparente
     prompt_template = f"""Create a simple, clean icon or logo that represents the following concept:
 {user_post_description}
 
-Style requirements:
+CRITICAL REQUIREMENTS:
+- TRANSPARENT BACKGROUND (PNG format with alpha channel)
 - Minimalist and modern design
 - Clear and recognizable symbol
-- Professional and suitable for a thumbnail
-- Transparent or clean background preferred
-- Bold and clear shapes
+- Professional and suitable for a thumbnail overlay
+- Bold and clear shapes that stand out
 - Works well at small sizes
 - No text or letters
 - Icon variation {icon_number} (make it slightly different if generating multiple)
+- Clean edges suitable for compositing
 
-The icon should be symbolic and instantly recognizable, similar to app icons or logo designs."""
+The icon should be symbolic and instantly recognizable, similar to app icons or logo designs.
+The background MUST be transparent or easily removable."""
 
-    print(f"\n🎯 GENERANDO ICONO #{icon_number}")
+    print(f"\n🎯 GENERANDO ICONO #{icon_number} (PNG transparente)")
     print("═" * 60)
     
     # Tamaño cuadrado para iconos

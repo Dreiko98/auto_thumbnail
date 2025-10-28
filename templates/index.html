@@ -159,12 +159,14 @@
             font-size: 1rem;
             transition: all 0.3s ease;
             background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
             background: var(--bg-secondary);
+            color: var(--text-primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
@@ -274,6 +276,202 @@
             background: linear-gradient(135deg, #6B2E94 0%, #DC1919 50%, #D76530 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(253, 29, 29, 0.3);
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-ai:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653b8a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-ai:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-ai-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            vertical-align: middle;
+        }
+
+        .btn-ai-trigger:hover {
+            transform: scale(1.15) rotate(15deg);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-ai-trigger:active {
+            transform: scale(0.95);
+        }
+
+        .btn-ai-trigger[disabled] {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .ai-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .ai-section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .ai-section-hidden {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .ai-info-box {
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .ai-generated-preview {
+            position: relative;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+        }
+
+        .ai-generated-preview img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .ai-generated-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .ai-loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .ai-prompt-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .ai-prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ai-prompt-content {
+            background: #1a1d28;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .ai-prompt-footer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-copy-prompt {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy-prompt:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-copy-prompt:active {
+            transform: translateY(0);
+        }
+
+        .btn-copy-prompt.copied {
+            background: var(--success-color);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .btn-group {
@@ -696,6 +894,9 @@
                 <button onclick="openTokenModal()" class="btn btn-secondary btn-small">
                     ⚙️ Token OpenAI
                 </button>
+                <button onclick="openChangePasswordModal()" class="btn btn-secondary btn-small">
+                    🔒 Cambiar Contraseña
+                </button>
                 <button onclick="logout()" class="btn btn-secondary btn-small">
                     🚪 Cerrar Sesión
                 </button>
@@ -767,7 +968,12 @@
                 <form id="thumbnailForm">
                     <!-- Background Image - Común para todas las plantillas -->
                     <div class="form-group">
-                        <label for="background_image">📸 Imagen de Fondo *</label>
+                        <label for="background_image">
+                            📸 Imagen de Fondo *
+                            <button type="button" class="btn-ai-trigger" onclick="openAiGeneratorModal('background')" title="Generar con IA">
+                                ✨
+                            </button>
+                        </label>
                         <div class="file-upload">
                             <input type="file" id="background_image" class="file-upload-input" accept="image/*" required>
                             <label for="background_image" class="file-upload-label">
@@ -788,7 +994,12 @@
 
                         <!-- Icons -->
                         <div class="form-group">
-                            <label for="icons">🎯 Iconos (Opcional)</label>
+                            <label for="icons">
+                                🎯 Iconos (Opcional)
+                                <button type="button" class="btn-ai-trigger" onclick="openAiGeneratorModal('icons')" title="Generar con IA">
+                                    ✨
+                                </button>
+                            </label>
                             <div class="file-upload">
                                 <input type="file" id="icons" class="file-upload-input" accept="image/*" multiple>
                                 <label for="icons" class="file-upload-label">
@@ -841,7 +1052,12 @@
 
                         <!-- Icono 1 - Esquina inferior izquierda -->
                         <div class="form-group">
-                            <label for="icon1_template3">🎯 Icono 1 (Esquina inferior izquierda) *</label>
+                            <label for="icon1_template3">
+                                🎯 Icono 1 (Esquina inferior izquierda) *
+                                <button type="button" class="btn-ai-trigger" onclick="openAiGeneratorModal('icon1_template3')" title="Generar con IA">
+                                    ✨
+                                </button>
+                            </label>
                             <div class="file-upload">
                                 <input type="file" id="icon1_template3" class="file-upload-input" accept="image/*">
                                 <label for="icon1_template3" class="file-upload-label">
@@ -854,7 +1070,12 @@
 
                         <!-- Icono 2 - Esquina inferior derecha -->
                         <div class="form-group">
-                            <label for="icon2_template3">🎯 Icono 2 (Esquina inferior derecha) *</label>
+                            <label for="icon2_template3">
+                                🎯 Icono 2 (Esquina inferior derecha) *
+                                <button type="button" class="btn-ai-trigger" onclick="openAiGeneratorModal('icon2_template3')" title="Generar con IA">
+                                    ✨
+                                </button>
+                            </label>
                             <div class="file-upload">
                                 <input type="file" id="icon2_template3" class="file-upload-input" accept="image/*">
                                 <label for="icon2_template3" class="file-upload-label">
@@ -1018,6 +1239,124 @@
         </div>
     </div>
 
+    <!-- Modal de Cambiar Contraseña -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔒 Cambiar Contraseña</h2>
+                <button class="close-modal" onclick="closeChangePasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="token-info">
+                    <p><strong>Actualiza tu contraseña</strong></p>
+                    <p>Por seguridad, necesitas introducir tu contraseña actual para cambiarla por una nueva.</p>
+                </div>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="current_password">Contraseña Actual</label>
+                        <input type="password" id="current_password" class="form-control" placeholder="Tu contraseña actual" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">Nueva Contraseña</label>
+                        <input type="password" id="new_password" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_new_password">Confirmar Nueva Contraseña</label>
+                        <input type="password" id="confirm_new_password" class="form-control" placeholder="Repite la nueva contraseña" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeChangePasswordModal()" class="btn btn-secondary">Cancelar</button>
+                <button onclick="handleChangePassword()" class="btn btn-primary">Cambiar Contraseña</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Generación con IA -->
+    <div id="aiGeneratorModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>✨ Generar con Inteligencia Artificial</h3>
+                <button class="modal-close" onclick="closeAiGeneratorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="aiModalType" style="margin-bottom: 20px; padding: 10px; background: var(--border-color); border-radius: 8px; text-align: center; font-weight: 600;">
+                    🎨 Generando imagen de fondo
+                </div>
+                
+                <div class="form-group">
+                    <label for="ai_modal_prompt">Descripción</label>
+                    <textarea 
+                        id="ai_modal_prompt" 
+                        class="form-control" 
+                        placeholder="Describe lo que quieres ver en la imagen..."
+                        rows="4"
+                        style="resize: vertical;"
+                    ></textarea>
+                    <small style="color: var(--text-secondary); font-size: 0.85rem;">
+                        💡 <strong>Ejemplo para fondo:</strong> "Tutorial de Python, pantalla con código, colores azules y morados, estilo moderno"
+                        <br>
+                        💡 <strong>Ejemplo para icono:</strong> "Icono de Python, logo de serpiente, diseño minimalista"
+                    </small>
+                </div>
+
+                <!-- Área de Prompt Optimizado -->
+                <div id="ai_prompt_display" class="ai-prompt-display" style="display: none;">
+                    <div class="ai-prompt-header">
+                        <strong>📋 Prompt Optimizado</strong>
+                        <button type="button" onclick="copyPromptToClipboard()" class="btn-copy-prompt" title="Copiar al portapapeles">
+                            📋 Copiar
+                        </button>
+                    </div>
+                    <div class="ai-prompt-content">
+                        <pre id="ai_prompt_text" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; color: inherit;"></pre>
+                    </div>
+                    <div class="ai-prompt-footer">
+                        <small style="color: var(--text-secondary);">
+                            💡 Copia este prompt y úsalo en ChatGPT, Claude, o cualquier IA generativa de imágenes para evitar gastar tu API key.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Loading state -->
+                <div id="ai_modal_loading" class="ai-loading" style="display: none;">
+                    <div class="ai-loading-spinner"></div>
+                    <div>
+                        <strong>Generando imagen con IA...</strong>
+                        <br><small style="color: var(--text-secondary);">Esto puede tardar 10-30 segundos</small>
+                    </div>
+                </div>
+
+                <!-- Preview de imagen generada -->
+                <div id="ai_modal_preview" class="ai-generated-preview" style="display: none; margin-top: 20px;">
+                    <strong>✨ Imagen generada exitosamente</strong>
+                    <img id="ai_modal_preview_img" src="" alt="Imagen generada" style="max-height: 400px;">
+                    <div class="ai-generated-actions">
+                        <button type="button" onclick="useAiImageFromModal()" class="btn btn-success" style="flex: 1;">
+                            ✓ Usar esta imagen
+                        </button>
+                        <button type="button" onclick="downloadAiImageFromModal()" class="btn btn-secondary">
+                            📥 Descargar
+                        </button>
+                        <button type="button" onclick="regenerateAiImageFromModal()" class="btn btn-secondary">
+                            🔄 Regenerar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeAiGeneratorModal()" class="btn btn-secondary">Cerrar</button>
+                <button id="getPromptBtn" onclick="getOptimizedPrompt()" class="btn btn-info">
+                    📋 Obtener Prompt
+                </button>
+                <button id="generateAiModalBtn" onclick="generateAiFromModal()" class="btn btn-ai">
+                    🎨 Generar con IA
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Variables globales
         let uploadedFiles = {
@@ -1029,6 +1368,10 @@
         };
         
         let selectedTemplate = null; // Nueva variable para almacenar la plantilla seleccionada
+
+        // Variables de sesión
+        let currentUser = null;
+        let aiGeneratedImage = null; // Para almacenar la imagen generada con IA
 
         // Referencias DOM
         const form = document.getElementById('thumbnailForm');
@@ -1065,8 +1408,473 @@
         const thumbnailCreationView = document.getElementById('thumbnailCreationView');
         const selectedTemplateInfo = document.getElementById('selectedTemplateInfo');
 
-        // Variables de sesión
-        let currentUser = null;
+        // ==========================================
+        // FUNCIONES DE GENERACIÓN DE IA
+        // ==========================================
+
+        async function generateAiBackground() {
+            const prompt = document.getElementById('ai_prompt').value.trim();
+            if (!prompt) {
+                showAlert('Por favor describe tu post antes de generar', 'error');
+                return;
+            }
+
+            const aiSection = document.querySelector('.ai-section');
+            const loadingDiv = aiSection.querySelector('.ai-loading');
+            const previewDiv = aiSection.querySelector('.ai-generated-preview');
+            const generateBtn = document.getElementById('generateAiBackgroundBtn');
+
+            // Ocultar preview anterior y mostrar loading
+            previewDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            generateBtn.disabled = true;
+
+            try {
+                const response = await fetch('/generate_ai_background', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: prompt })
+                });
+
+                const data = await response.json();
+                
+                console.log('Respuesta del servidor:', data); // Debug
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al generar imagen');
+                }
+
+                // Validar que la respuesta tiene los datos necesarios
+                if (!data.filename || !data.preview) {
+                    console.error('Datos incompletos:', data);
+                    throw new Error('Respuesta inválida del servidor');
+                }
+
+                // Guardar información de la imagen generada
+                aiGeneratedImage = {
+                    filename: data.filename,
+                    preview: data.preview,  // Ya incluye data:image/png;base64,
+                    prompt: prompt
+                };
+
+                // Mostrar preview
+                const previewImg = previewDiv.querySelector('img');
+                previewImg.src = data.preview;  // Usar directamente
+                previewDiv.style.display = 'block';
+
+                showAlert('✨ Imagen generada con éxito', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message || 'Error al generar imagen con IA', 'error');
+            } finally {
+                loadingDiv.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function useAiImage() {
+            if (!aiGeneratedImage) {
+                showAlert('No hay imagen generada para usar', 'error');
+                return;
+            }
+
+            if (!aiGeneratedImage.preview || !aiGeneratedImage.filename) {
+                showAlert('Error: Datos de imagen incompletos', 'error');
+                console.error('aiGeneratedImage:', aiGeneratedImage);
+                return;
+            }
+
+            try {
+                // La imagen ya está guardada en el servidor, solo usamos el filename
+                uploadedFiles.background = aiGeneratedImage.filename;
+                
+                // Actualizar UI del campo de fondo
+                backgroundInfo.textContent = `✅ ${aiGeneratedImage.filename} (IA)`;
+                backgroundInfo.className = 'file-info success';
+                backgroundInfo.style.display = 'block';
+                
+                // Ocultar el label de upload
+                const bgLabel = document.querySelector('label[for="background_image"]');
+                if (bgLabel) {
+                    bgLabel.style.display = 'none';
+                }
+                
+                // Mostrar preview en la sección principal
+                showImagePreview(aiGeneratedImage.preview, '✨ Imagen generada con IA');
+                
+                // Scroll al formulario principal
+                document.getElementById('thumbnailCreationView').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                showAlert('✅ Imagen asignada al fondo de la miniatura', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al usar la imagen generada', 'error');
+            }
+        }
+
+        async function downloadAiImage() {
+            if (!aiGeneratedImage) {
+                showAlert('No hay imagen para descargar', 'error');
+                return;
+            }
+
+            if (!aiGeneratedImage.preview || !aiGeneratedImage.filename) {
+                showAlert('Error: Datos de imagen incompletos', 'error');
+                console.error('aiGeneratedImage:', aiGeneratedImage);
+                return;
+            }
+
+            try {
+                const response = await fetch(aiGeneratedImage.preview);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = aiGeneratedImage.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showAlert('📥 Imagen descargada', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al descargar la imagen', 'error');
+            }
+        }
+
+        async function regenerateAiImage() {
+            if (!aiGeneratedImage || !aiGeneratedImage.prompt) {
+                showAlert('No hay prompt guardado para regenerar', 'error');
+                return;
+            }
+
+            const confirmed = confirm('¿Quieres regenerar la imagen? Esto creará una nueva versión.');
+            if (confirmed) {
+                await generateAiBackground();
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DEL MODAL DE GENERACIÓN IA
+        // ==========================================
+
+        let currentAiModalType = null; // 'background', 'icons', 'icon1_template3', 'icon2_template3'
+        let aiModalGeneratedImage = null;
+
+        function openAiGeneratorModal(type) {
+            currentAiModalType = type;
+            aiModalGeneratedImage = null;
+
+            // Actualizar el título del modal según el tipo
+            const typeText = {
+                'background': '🎨 Generando imagen de fondo',
+                'icons': '🎯 Generando icono (hasta 4)',
+                'icon1_template3': '🎯 Generando icono 1',
+                'icon2_template3': '🎯 Generando icono 2'
+            };
+
+            document.getElementById('aiModalType').textContent = typeText[type] || '✨ Generando imagen';
+            document.getElementById('ai_modal_prompt').value = '';
+            document.getElementById('ai_modal_preview').style.display = 'none';
+            document.getElementById('ai_modal_loading').style.display = 'none';
+            document.getElementById('ai_prompt_display').style.display = 'none';
+
+            // Actualizar estado del botón "Generar con IA" según token
+            const generateBtn = document.getElementById('generateAiModalBtn');
+            if (!currentUser || !currentUser.has_openai_token) {
+                generateBtn.disabled = true;
+                generateBtn.title = 'Necesitas configurar tu token de OpenAI';
+            } else {
+                generateBtn.disabled = false;
+                generateBtn.title = '';
+            }
+
+            document.getElementById('aiGeneratorModal').classList.add('show');
+        }
+
+        function closeAiGeneratorModal() {
+            document.getElementById('aiGeneratorModal').classList.remove('show');
+            document.getElementById('ai_prompt_display').style.display = 'none';
+            currentAiModalType = null;
+            aiModalGeneratedImage = null;
+        }
+
+        function buildOptimizedPrompt(description, type) {
+            /**
+             * Construye el prompt optimizado según el tipo de imagen
+             */
+            if (type === 'background') {
+                return `Create a professional realistic stock photo style background image in landscape orientation (16:9 ratio). 
+The image should be suitable as a YouTube thumbnail or blog post background.
+Style: Modern, clean, professional, with good contrast and visual appeal.
+Subject: ${description}
+Important: Leave enough negative space in the center for text overlay. 
+The image should be visually interesting but not too busy or cluttered.
+Colors: Vibrant but professional, suitable for tech/professional content.
+Avoid: Text, logos, watermarks, faces unless specifically mentioned in the subject.`;
+            } else {
+                // Para iconos
+                let iconNumber = 1;
+                if (type === 'icon2_template3') iconNumber = 2;
+                
+                return `Create a simple, clean icon or logo that represents the following concept:
+${description}
+
+CRITICAL REQUIREMENTS:
+- TRANSPARENT BACKGROUND (PNG format with alpha channel)
+- Minimalist and modern design
+- Clear and recognizable symbol
+- Professional and suitable for a thumbnail overlay
+- Bold and clear shapes that stand out
+- Works well at small sizes
+- No text or letters
+- Icon variation ${iconNumber} (make it slightly different if generating multiple)
+- Clean edges suitable for compositing
+
+The icon should be symbolic and instantly recognizable, similar to app icons or logo designs.
+The background MUST be transparent or easily removable.`;
+            }
+        }
+
+        function getOptimizedPrompt() {
+            const description = document.getElementById('ai_modal_prompt').value.trim();
+            
+            if (!description) {
+                showAlert('Por favor escribe una descripción primero', 'error');
+                return;
+            }
+
+            // Construir el prompt optimizado
+            const optimizedPrompt = buildOptimizedPrompt(description, currentAiModalType);
+            
+            // Mostrar el área de prompt
+            const promptDisplay = document.getElementById('ai_prompt_display');
+            const promptText = document.getElementById('ai_prompt_text');
+            
+            promptText.textContent = optimizedPrompt;
+            promptDisplay.style.display = 'block';
+            
+            // Ocultar preview si estaba visible
+            document.getElementById('ai_modal_preview').style.display = 'none';
+            
+            // Scroll al área de prompt
+            promptDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            showAlert('✅ Prompt generado. Puedes copiarlo y usarlo en cualquier IA', 'success');
+        }
+
+        async function copyPromptToClipboard() {
+            const promptText = document.getElementById('ai_prompt_text').textContent;
+            const copyBtn = document.querySelector('.btn-copy-prompt');
+            
+            try {
+                await navigator.clipboard.writeText(promptText);
+                
+                // Feedback visual
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Copiado';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+                
+                showAlert('📋 Prompt copiado al portapapeles', 'success');
+            } catch (error) {
+                console.error('Error al copiar:', error);
+                showAlert('Error al copiar. Intenta seleccionar y copiar manualmente', 'error');
+            }
+        }
+
+        async function generateAiFromModal() {
+            const prompt = document.getElementById('ai_modal_prompt').value.trim();
+            if (!prompt) {
+                showAlert('Por favor describe lo que quieres generar', 'error');
+                return;
+            }
+
+            // Verificar que el usuario tenga token
+            if (!currentUser || !currentUser.has_openai_token) {
+                showAlert('Necesitas configurar tu token de OpenAI para generar con IA', 'error');
+                openTokenModal();
+                return;
+            }
+
+            const loadingDiv = document.getElementById('ai_modal_loading');
+            const previewDiv = document.getElementById('ai_modal_preview');
+            const promptDisplay = document.getElementById('ai_prompt_display');
+            const generateBtn = document.getElementById('generateAiModalBtn');
+
+            previewDiv.style.display = 'none';
+            promptDisplay.style.display = 'none';  // Ocultar área de prompt
+            loadingDiv.style.display = 'block';
+            generateBtn.disabled = true;
+
+            try {
+                let endpoint = '';
+                let iconNumber = null;
+
+                // Determinar endpoint según el tipo
+                if (currentAiModalType === 'background') {
+                    endpoint = '/generate_ai_background';
+                } else {
+                    // Para iconos
+                    endpoint = '/generate_ai_icon';
+                    if (currentAiModalType === 'icon1_template3') iconNumber = 1;
+                    else if (currentAiModalType === 'icon2_template3') iconNumber = 2;
+                }
+
+                const body = { description: prompt };
+                if (iconNumber !== null) body.icon_number = iconNumber;
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                console.log('Respuesta del servidor (modal):', data);
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al generar imagen');
+                }
+
+                if (!data.filename || !data.preview) {
+                    console.error('Datos incompletos:', data);
+                    throw new Error('Respuesta inválida del servidor');
+                }
+
+                // Guardar información de la imagen generada
+                aiModalGeneratedImage = {
+                    filename: data.filename,
+                    preview: data.preview,
+                    prompt: prompt,
+                    type: currentAiModalType
+                };
+
+                // Mostrar preview
+                const previewImg = document.getElementById('ai_modal_preview_img');
+                previewImg.src = data.preview;
+                previewDiv.style.display = 'block';
+
+                showAlert('✨ Imagen generada con éxito', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message || 'Error al generar imagen con IA', 'error');
+            } finally {
+                loadingDiv.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function useAiImageFromModal() {
+            if (!aiModalGeneratedImage) {
+                showAlert('No hay imagen generada para usar', 'error');
+                return;
+            }
+
+            try {
+                const type = aiModalGeneratedImage.type;
+                const filename = aiModalGeneratedImage.filename;
+                const preview = aiModalGeneratedImage.preview;
+
+                if (type === 'background') {
+                    // Asignar como fondo
+                    uploadedFiles.background = filename;
+                    backgroundInfo.textContent = `✅ ${filename} (IA)`;
+                    backgroundInfo.className = 'file-info success';
+                    backgroundInfo.style.display = 'block';
+                    
+                    const bgLabel = document.querySelector('label[for="background_image"]');
+                    if (bgLabel) bgLabel.style.display = 'none';
+                    
+                    showImagePreview(preview, '✨ Imagen generada con IA');
+                    
+                } else if (type === 'icons') {
+                    // Agregar a la lista de iconos
+                    if (!uploadedFiles.icons) uploadedFiles.icons = [];
+                    uploadedFiles.icons.push(filename);
+                    
+                    iconsInfo.textContent = `✅ ${uploadedFiles.icons.length} icono(s) - último con IA`;
+                    iconsInfo.className = 'file-info success';
+                    iconsInfo.style.display = 'block';
+                    
+                    // Mostrar preview del icono
+                    const iconPreview = document.createElement('div');
+                    iconPreview.className = 'icon-preview-item';
+                    iconPreview.innerHTML = `<img src="${preview}" alt="Icono IA"><span>✨ IA</span>`;
+                    iconsPreview.appendChild(iconPreview);
+                    
+                } else if (type === 'icon1_template3') {
+                    uploadedFiles.icon1_template3 = filename;
+                    icon1Template3Info.textContent = `✅ ${filename} (IA)`;
+                    icon1Template3Info.className = 'file-info success';
+                    icon1Template3Info.style.display = 'block';
+                    
+                    icon1Template3Preview.innerHTML = `<div class="icon-preview-item"><img src="${preview}" alt="Icono 1"><span>✨ IA</span></div>`;
+                    
+                } else if (type === 'icon2_template3') {
+                    uploadedFiles.icon2_template3 = filename;
+                    icon2Template3Info.textContent = `✅ ${filename} (IA)`;
+                    icon2Template3Info.className = 'file-info success';
+                    icon2Template3Info.style.display = 'block';
+                    
+                    icon2Template3Preview.innerHTML = `<div class="icon-preview-item"><img src="${preview}" alt="Icono 2"><span>✨ IA</span></div>`;
+                }
+
+                showAlert('✅ Imagen asignada correctamente', 'success');
+                closeAiGeneratorModal();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al usar la imagen generada', 'error');
+            }
+        }
+
+        async function downloadAiImageFromModal() {
+            if (!aiModalGeneratedImage) {
+                showAlert('No hay imagen para descargar', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(aiModalGeneratedImage.preview);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = aiModalGeneratedImage.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showAlert('📥 Imagen descargada', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al descargar la imagen', 'error');
+            }
+        }
+
+        async function regenerateAiImageFromModal() {
+            if (!aiModalGeneratedImage || !aiModalGeneratedImage.prompt) {
+                showAlert('No hay prompt guardado para regenerar', 'error');
+                return;
+            }
+
+            const confirmed = confirm('¿Quieres regenerar la imagen? Esto creará una nueva versión.');
+            if (confirmed) {
+                await generateAiFromModal();
+            }
+        }
 
         // ==========================================
         // FUNCIONES DE AUTENTICACIÓN Y SESIÓN
@@ -1099,6 +1907,8 @@
             
             // Actualizar badge del token
             const tokenBadge = document.getElementById('tokenBadge');
+            const aiTriggerButtons = document.querySelectorAll('.btn-ai-trigger');
+            
             if (user.has_openai_token) {
                 tokenBadge.textContent = '✓ Token IA activo';
                 tokenBadge.className = 'token-status active';
@@ -1106,12 +1916,18 @@
                 tokenBadge.textContent = 'Sin token IA';
                 tokenBadge.className = 'token-status inactive';
             }
+            
+            // Los botones ✨ siempre están habilitados (permiten obtener prompt sin token)
+            aiTriggerButtons.forEach(btn => btn.disabled = false);
         }
 
         // Actualizar UI para invitado
         function updateUIForGuest() {
             document.getElementById('guestActions').style.display = 'flex';
             document.getElementById('userActions').style.display = 'none';
+            // Los botones ✨ siempre están habilitados (permiten obtener prompt)
+            const aiTriggerButtons = document.querySelectorAll('.btn-ai-trigger');
+            aiTriggerButtons.forEach(btn => btn.disabled = false);
         }
 
         // Abrir/cerrar modal de login
@@ -1147,12 +1963,25 @@
             document.getElementById('tokenForm').reset();
         }
 
+        // Abrir/cerrar modal de cambio de contraseña
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('show');
+            document.getElementById('current_password').focus();
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('show');
+            document.getElementById('changePasswordForm').reset();
+        }
+
         // Cerrar modales con ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeLoginModal();
                 closeRegisterModal();
                 closeTokenModal();
+                closeChangePasswordModal();
+                closeAiGeneratorModal();
             }
         });
 
@@ -1161,10 +1990,14 @@
             const loginModal = document.getElementById('loginModal');
             const registerModal = document.getElementById('registerModal');
             const tokenModal = document.getElementById('tokenModal');
+            const changePasswordModal = document.getElementById('changePasswordModal');
+            const aiGeneratorModal = document.getElementById('aiGeneratorModal');
             
             if (event.target === loginModal) closeLoginModal();
             if (event.target === registerModal) closeRegisterModal();
             if (event.target === tokenModal) closeTokenModal();
+            if (event.target === changePasswordModal) closeChangePasswordModal();
+            if (event.target === aiGeneratorModal) closeAiGeneratorModal();
         };
 
         // Manejar login
@@ -1285,8 +2118,10 @@
                 if (data.success) {
                     showAlert(data.message, 'success');
                     closeTokenModal();
-                    // Actualizar badge
+                    
+                    // Actualizar badge del token
                     const tokenBadge = document.getElementById('tokenBadge');
+                    
                     if (token) {
                         tokenBadge.textContent = '✓ Token IA activo';
                         tokenBadge.className = 'token-status active';
@@ -1296,12 +2131,66 @@
                         tokenBadge.className = 'token-status inactive';
                         currentUser.has_openai_token = false;
                     }
+                    
+                    // Los botones ✨ siempre permanecen habilitados
                 } else {
                     showAlert(data.message, 'error');
                 }
             } catch (error) {
                 console.error('Error al actualizar token:', error);
                 showAlert('Error al actualizar token', 'error');
+            }
+        }
+
+        // Manejar cambio de contraseña
+        async function handleChangePassword() {
+            const currentPassword = document.getElementById('current_password').value.trim();
+            const newPassword = document.getElementById('new_password').value.trim();
+            const confirmPassword = document.getElementById('confirm_new_password').value.trim();
+            
+            // Validaciones del lado del cliente
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showAlert('Por favor completa todos los campos', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('Las contraseñas nuevas no coinciden', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showAlert('La nueva contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
+            if (newPassword === currentPassword) {
+                showAlert('La nueva contraseña debe ser diferente a la actual', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/change_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    closeChangePasswordModal();
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error al cambiar contraseña:', error);
+                showAlert('Error al cambiar contraseña', 'error');
             }
         }
 
@@ -1312,6 +2201,17 @@
         // Funciones de navegación
         function selectTemplate(templateNumber) {
             selectedTemplate = templateNumber;
+            
+            // Limpiar imagen generada con IA al cambiar de plantilla
+            aiGeneratedImage = null;
+            const aiPreview = document.getElementById('ai_preview');
+            if (aiPreview) {
+                aiPreview.style.display = 'none';
+            }
+            const aiPrompt = document.getElementById('ai_prompt');
+            if (aiPrompt) {
+                aiPrompt.value = '';
+            }
             
             // Ocultar vista de selección y mostrar vista de creación
             templateSelectionView.style.display = 'none';
